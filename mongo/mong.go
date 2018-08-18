@@ -17,7 +17,7 @@ const (
 	VDBNAME = "vol"
 	ICOL    = "invalids"
 	VCOL    = "volonters"
-	CONN    = LOCAL
+	CONN    = DOCKER
 )
 
 func InvSin(id, password string) string {
@@ -80,7 +80,7 @@ func VolSin(number, password string) string {
 	return "signIN"
 }
 
-func VolSup(name, number, geo, password string) string {
+func VolSup(name, number, password string, geo [2]string) string {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.Fatal(err)
@@ -100,7 +100,7 @@ func VolSup(name, number, geo, password string) string {
 	return "signUP"
 }
 
-func GetGeoV() []string {
+func GetGeoV() [][2]string {
 	var fGeo []s.VolUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
@@ -114,7 +114,7 @@ func GetGeoV() []string {
 		log.Fatal(err)
 	}
 
-	var result []string
+	var result [][2]string
 	for i, _ := range fGeo {
 		result = append(result, fGeo[i].Geo)
 	}

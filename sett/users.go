@@ -10,6 +10,6 @@ type InvUser struct {
 type VolUser struct {
 	Name     string
 	Number   string
-	Geo      string
+	Geo      [2]string // ["latitude","longitude"]
 	Password string
 }

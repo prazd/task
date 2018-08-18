@@ -76,7 +76,8 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	up := mongo.VolSup(vol.Name, vol.Number, vol.Geo, vol.Password)
+
+	up := mongo.VolSup(vol.Name, vol.Number, vol.Password, vol.Geo)
 
 	resp := struct {
 		Resp string `json:"resp"`
@@ -115,9 +116,8 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 
 func GeoList(w http.ResponseWriter, r *http.Request) {
 	geolist := mongo.GetGeoV()
-
 	resp := struct {
-		Resp []string `json:"resp"`
+		Resp [][2]string `json:"resp"`
 	}{Resp: geolist}
 	js, err := json.Marshal(resp)
 	if err != nil {
