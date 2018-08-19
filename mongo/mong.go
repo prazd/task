@@ -17,7 +17,7 @@ const (
 	VDBNAME = "vol"
 	ICOL    = "invalids"
 	VCOL    = "volonters"
-	CONN    = DOCKER
+	CONN    = LOCAL
 )
 
 func InvSin(id, password string) string {
@@ -28,14 +28,20 @@ func InvSin(id, password string) string {
 	}
 	defer session.Close()
 	c := session.DB(IDBNAME).C(ICOL)
+	colQuierier := bson.M{"id": id}
 	var findR s.InvUser
-	c.Find(bson.M{"id": id}).One(&findR)
+	c.Find(colQuierier).One(&findR)
 	if len(findR.Name) == 0 {
 		return "not in db"
 	}
 	checkPass := comparePasswords(findR.Password, []byte(password))
 	if checkPass != true {
 		return "bad pass"
+	}
+	status := bson.M{"$set": bson.M{"needhelp": true}}
+	err = c.Update(colQuierier, status)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return findR.Name
 }
@@ -48,7 +54,7 @@ func InvSup(id, name, number, password string) string {
 	defer session.Close()
 	c := session.DB(IDBNAME).C(ICOL)
 	var findR s.InvUser
-	c.Find(bson.M{"number": number}).One(&findR)
+	c.Find(bson.M{"id": id}).One(&findR)
 	if len(findR.Name) != 0 {
 		return "in db"
 	}
@@ -67,14 +73,20 @@ func VolSin(number, password string) string {
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
+	colQuierier := bson.M{"number": number}
 	var findR s.VolUser
-	c.Find(bson.M{"number": number}).One(&findR)
+	c.Find(colQuierier).One(&findR)
 	if len(findR.Number) == 0 {
 		return "not in db"
 	}
 	checkPass := comparePasswords(findR.Password, []byte(password))
 	if checkPass != true {
 		return "bad pass"
+	}
+	status := bson.M{"$set": bson.M{"canhelp": true}}
+	err = c.Update(colQuierier, status)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return findR.Name

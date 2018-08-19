@@ -5,6 +5,7 @@ type InvUser struct {
 	Name     string
 	Number   string
 	Password string
+	NeedHelp bool
 }
 
 type VolUser struct {
@@ -12,4 +13,5 @@ type VolUser struct {
 	Number   string
 	Geo      [2]string // ["latitude","longitude"]
 	Password string
+	CanHelp  bool
 }
