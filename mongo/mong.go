@@ -37,7 +37,7 @@ func InvSin(id, password string) string {
 	if checkPass != true {
 		return "bad pass"
 	}
-	return "signIN"
+	return findR.Name
 }
 
 func InvSup(id, name, number, password string) string {
@@ -77,7 +77,7 @@ func VolSin(number, password string) string {
 		return "bad pass"
 	}
 
-	return "signIN"
+	return findR.Name
 }
 
 func VolSup(name, number, password string, geo [2]string) string {
