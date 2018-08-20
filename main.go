@@ -15,6 +15,8 @@ func main() {
 	http.HandleFunc("/inv/in", InvSignIn)
 	http.HandleFunc("/vol/up", VolSignUp)
 	http.HandleFunc("/vol/in", VolSignIn)
+	http.HandleFunc("/vol/exit", VolEx)
+	http.HandleFunc("/inv/exit", InvEx)
 	http.HandleFunc("/geolist", GeoList)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -53,11 +55,12 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	in := mongo.InvSin(inv.Id, inv.Password)
+	sIn, name := mongo.InvSin(inv.Id, inv.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
-	}{in}
+		Name string `json:"name"`
+	}{sIn, name}
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Fatal(bad)
@@ -101,16 +104,25 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	in := mongo.VolSin(vol.Number, vol.Password)
+	sIn, name := mongo.VolSin(vol.Number, vol.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
-	}{in}
+		Name string `json:""name`
+	}{sIn, name}
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Fatal(bad)
 	}
 	w.Write(js)
+
+}
+
+func VolEx(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func InvEx(w http.ResponseWriter, r *http.Request) {
 
 }
 

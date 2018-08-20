@@ -1,4 +1,4 @@
-# Backend for Android and IOS applications
+# Backend and monitoring bot for IOS application
 
 IOS app - https://github.com/Korobych/SocialApp
 
