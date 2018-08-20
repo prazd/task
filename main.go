@@ -55,7 +55,7 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sIn, name := mongo.InvSin(inv.Id, inv.Password)
+	name, sIn := mongo.InvSin(inv.Id, inv.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
@@ -104,11 +104,11 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sIn, name := mongo.VolSin(vol.Number, vol.Password)
+	name, sIn := mongo.VolSin(vol.Number, vol.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
-		Name string `json:""name`
+		Name string `json:"name"`
 	}{sIn, name}
 	js, bad := json.Marshal(resp)
 	if bad != nil {
