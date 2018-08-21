@@ -18,7 +18,7 @@ const (
 	VDBNAME = "vol"
 	ICOL    = "invalids"
 	VCOL    = "volonters"
-	CONN    = LOCAL
+	CONN    = DOCKER
 )
 
 func InvSin(id, password string) (string, string) {
