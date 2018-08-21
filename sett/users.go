@@ -4,6 +4,7 @@ type InvUser struct {
 	Id       string
 	Name     string
 	Number   string
+	Geo      [2]string
 	Password string
 	NeedHelp bool
 }

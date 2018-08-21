@@ -5,19 +5,24 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"./mongo"
 	s "./sett"
 )
 
 func main() {
+
 	http.HandleFunc("/inv/up", InvSignUp)
 	http.HandleFunc("/inv/in", InvSignIn)
 	http.HandleFunc("/vol/up", VolSignUp)
 	http.HandleFunc("/vol/in", VolSignIn)
-	http.HandleFunc("/vol/exit", VolEx)
-	http.HandleFunc("/inv/exit", InvEx)
+	http.HandleFunc("/vol/ex", VolExit)
+	http.HandleFunc("/inv/ex", InvExit)
 	http.HandleFunc("/geolist", GeoList)
+	http.HandleFunc("/vol/ch", VolHelp)
+	http.HandleFunc("/inv/nh", InvHelp)
+
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
@@ -80,7 +85,7 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	up := mongo.VolSup(vol.Name, vol.Number, vol.Password, vol.Geo)
+	up := mongo.VolSup(vol.Name, vol.Number, vol.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
@@ -118,12 +123,114 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func VolEx(w http.ResponseWriter, r *http.Request) {
+func VolHelp(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	type canHelp struct {
+		Number    string
+		Longitude string
+		Latitude  string
+	}
+
+	var ch canHelp
+
+	err = json.Unmarshal(body, &ch)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	help := mongo.VHelp(ch.Number, ch.Latitude, ch.Longitude)
+	resp := struct {
+		Resp string `json:"resp"`
+	}{strconv.FormatBool(help)}
+
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Fatal(bad)
+	}
+	w.Write(js)
 }
 
-func InvEx(w http.ResponseWriter, r *http.Request) {
+func InvHelp(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	type needHelp struct {
+		Id        string
+		Longitude string
+		Latitude  string
+	}
+
+	var nh needHelp
+
+	err = json.Unmarshal(body, &nh)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	help := mongo.IHelp(nh.Id, nh.Latitude, nh.Longitude)
+	resp := struct {
+		Resp string `json:"resp"`
+	}{strconv.FormatBool(help)}
+
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Fatal(bad)
+	}
+	w.Write(js)
+}
+
+func VolExit(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var vol s.VolUser
+	err = json.Unmarshal(body, &vol)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	help := mongo.VolEx(vol.Number)
+	resp := struct {
+		Resp string `json:"resp"`
+	}{strconv.FormatBool(help)}
+
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Fatal(bad)
+	}
+	w.Write(js)
+}
+
+func InvExit(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var inv s.InvUser
+	err = json.Unmarshal(body, &inv)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	help := mongo.InvEx(inv.Id)
+	resp := struct {
+		Resp string `json:"resp"`
+	}{strconv.FormatBool(help)}
+
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Fatal(bad)
+	}
+	w.Write(js)
 }
 
 func GeoList(w http.ResponseWriter, r *http.Request) {

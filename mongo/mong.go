@@ -39,11 +39,7 @@ func InvSin(id, password string) (string, string) {
 	if checkPass != true {
 		return "", "bad pass"
 	}
-	status := bson.M{"$set": bson.M{"needhelp": true}}
-	err = c.Update(colQuierier, status)
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	return findR.Name, "signIn"
 }
 
@@ -84,16 +80,11 @@ func VolSin(number, password string) (string, string) {
 	if checkPass != true {
 		return "", "bad pass"
 	}
-	status := bson.M{"$set": bson.M{"canhelp": true}}
-	err = c.Update(colQuierier, status)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	return findR.Name, "signIn"
 }
 
-func VolSup(name, number, password string, geo [2]string) string {
+func VolSup(name, number, password string) string {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.Fatal(err)
@@ -106,11 +97,102 @@ func VolSup(name, number, password string, geo [2]string) string {
 		return "in db"
 	}
 	hashPass := hashAndSalt([]byte(password))
-	err = c.Insert(&s.VolUser{Name: name, Number: number, Geo: geo, Password: hashPass})
+	err = c.Insert(&s.VolUser{Name: name, Number: number, Password: hashPass})
 	if err != nil {
 		log.Fatal(err)
 	}
 	return "signUP"
+}
+
+func VHelp(number, lat, long string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+	c := session.DB(VDBNAME).C(VCOL)
+	var findR s.VolUser
+	colQuierier := bson.M{"number": number}
+	c.Find(colQuierier).One(&findR)
+	geo := [2]string{lat, long}
+
+	if len(findR.Name) == 0 {
+		return false
+	} else {
+		status := bson.M{"$set": bson.M{"canhelp": true, "geo": geo}}
+		err = c.Update(colQuierier, status)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return true
+	}
+}
+
+func IHelp(id, lat, long string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+	c := session.DB(IDBNAME).C(ICOL)
+	var findR s.InvUser
+	colQuierier := bson.M{"id": id}
+	c.Find(colQuierier).One(&findR)
+	geo := [2]string{lat, long}
+	if len(findR.Name) == 0 {
+		return false
+	} else {
+		status := bson.M{"$set": bson.M{"needhelp": true, "geo": geo}}
+		err = c.Update(colQuierier, status)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return true
+	}
+}
+
+func VolEx(number string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+	c := session.DB(VDBNAME).C(VCOL)
+	var findR s.VolUser
+	colQuierier := bson.M{"number": number}
+	c.Find(colQuierier).One(&findR)
+	if len(findR.Name) == 0 {
+		return false
+	} else {
+		status := bson.M{"$set": bson.M{"canhelp": false}}
+		err = c.Update(colQuierier, status)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return true
+	}
+}
+
+func InvEx(id string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+	c := session.DB(IDBNAME).C(ICOL)
+	var findR s.InvUser
+	colQuierier := bson.M{"id": id}
+	c.Find(colQuierier).One(&findR)
+	if len(findR.Id) == 0 {
+		return false
+	} else {
+		status := bson.M{"$set": bson.M{"needhelp": false}}
+		err = c.Update(colQuierier, status)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return true
+	}
 }
 
 func GetGeoV() [][]string {
