@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"log"
+	"strconv"
 
 	s "../sett"
 
@@ -112,7 +113,7 @@ func VolSup(name, number, password string, geo [2]string) string {
 	return "signUP"
 }
 
-func GetGeoV() [][2]string {
+func GetGeoV() [][]string {
 	var fGeo []s.VolUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
@@ -126,9 +127,11 @@ func GetGeoV() [][2]string {
 		log.Fatal(err)
 	}
 
-	var result [][2]string
+	var result [][]string
 	for i, _ := range fGeo {
-		result = append(result, fGeo[i].Geo)
+		sl := fGeo[i].Geo[:]
+		sl = append(sl, strconv.FormatBool(fGeo[i].CanHelp))
+		result = append(result, sl)
 	}
 
 	return result

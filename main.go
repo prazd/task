@@ -129,7 +129,7 @@ func InvEx(w http.ResponseWriter, r *http.Request) {
 func GeoList(w http.ResponseWriter, r *http.Request) {
 	geolist := mongo.GetGeoV()
 	resp := struct {
-		Resp [][2]string `json:"resp"`
+		Resp [][]string `json:"resp"`
 	}{Resp: geolist}
 	js, err := json.Marshal(resp)
 	if err != nil {
