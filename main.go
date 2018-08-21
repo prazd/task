@@ -19,7 +19,8 @@ func main() {
 	http.HandleFunc("/vol/in", VolSignIn)
 	http.HandleFunc("/vol/ex", VolExit)
 	http.HandleFunc("/inv/ex", InvExit)
-	http.HandleFunc("/geolist", GeoList)
+	http.HandleFunc("/vol/geolist", VGeoList)
+	http.HandleFunc("/inv/geolist", IGeoList)
 	http.HandleFunc("/vol/ch", VolHelp)
 	http.HandleFunc("/inv/nh", InvHelp)
 
@@ -233,8 +234,20 @@ func InvExit(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-func GeoList(w http.ResponseWriter, r *http.Request) {
+func VGeoList(w http.ResponseWriter, r *http.Request) {
 	geolist := mongo.GetGeoV()
+	resp := struct {
+		Resp [][]string `json:"resp"`
+	}{Resp: geolist}
+	js, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Write(js)
+}
+
+func IGeoList(w http.ResponseWriter, r *http.Request) {
+	geolist := mongo.GetGeoI()
 	resp := struct {
 		Resp [][]string `json:"resp"`
 	}{Resp: geolist}

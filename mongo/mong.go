@@ -18,7 +18,7 @@ const (
 	VDBNAME = "vol"
 	ICOL    = "invalids"
 	VCOL    = "volonters"
-	CONN    = DOCKER
+	CONN    = LOCAL
 )
 
 func InvSin(id, password string) (string, string) {
@@ -213,6 +213,31 @@ func GetGeoV() [][]string {
 	for i, _ := range fGeo {
 		sl := fGeo[i].Geo[:]
 		sl = append(sl, strconv.FormatBool(fGeo[i].CanHelp))
+		result = append(result, sl)
+	}
+
+	return result
+}
+
+func GetGeoI() [][]string {
+
+	var fGeo []s.InvUser
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	c := session.DB(IDBNAME).C(ICOL)
+	err = c.Find(bson.M{}).All(&fGeo)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var result [][]string
+	for i, _ := range fGeo {
+		sl := fGeo[i].Geo[:]
+		sl = append(sl, strconv.FormatBool(fGeo[i].NeedHelp))
 		result = append(result, sl)
 	}
 
