@@ -10,9 +10,11 @@ type InvUser struct {
 }
 
 type VolUser struct {
-	Name     string
-	Number   string
-	Geo      [2]string // ["latitude","longitude"]
-	Password string
-	CanHelp  bool
+	Name        string
+	Number      string
+	Geo         [2]string // ["latitude","longitude"]
+	Password    string
+	CanHelp     bool
+	GoodReviews int
+	BadReviews  int
 }

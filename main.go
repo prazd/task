@@ -9,6 +9,7 @@ import (
 
 	"./mongo"
 	s "./sett"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 	http.HandleFunc("/inv/ex", InvExit)
 	http.HandleFunc("/vol/geolist", VGeoList)
 	http.HandleFunc("/inv/geolist", IGeoList)
+	http.HandleFunc("/vol/getrev", GetVRev)
+	http.HandleFunc("/vol/chrev", ChangeVRev)
 	http.HandleFunc("/vol/ch", VolHelp)
 	http.HandleFunc("/inv/nh", InvHelp)
 
@@ -253,6 +256,55 @@ func IGeoList(w http.ResponseWriter, r *http.Request) {
 	}{Resp: geolist}
 	js, err := json.Marshal(resp)
 	if err != nil {
+		log.Fatal(err)
+	}
+	w.Write(js)
+}
+
+func GetVRev(w http.ResponseWriter, r *http.Request) {
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var vol s.VolUser
+	err = json.Unmarshal(body, &vol)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	good, bad := mongo.GetVolReviews(vol.Number)
+
+	resp := struct {
+		Good int `json:"goodrev"`
+		Bad  int `json:"badreviews"`
+	}{good, bad}
+
+	js, excp := json.Marshal(resp)
+	if excp != nil {
+		log.Fatal(err)
+	}
+	w.Write(js)
+}
+
+func ChangeVRev(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	type Req struct {
+		Number string `json:"number"`
+		Review string `json:"review"`
+	}
+	var req Req
+	err = json.Unmarshal(body, &req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rev := mongo.ChangeVReview(req.Number, req.Review)
+	js, excp := json.Marshal(bson.M{"resp": rev})
+	if excp != nil {
 		log.Fatal(err)
 	}
 	w.Write(js)
