@@ -21,7 +21,7 @@ const (
 	CONN    = LOCAL
 )
 
-func InvSin(id, password string) (string, string) {
+func InvSin(id, password string) (string, string, string) {
 
 	session, err := mgo.Dial(CONN)
 	if err != nil {
@@ -33,14 +33,15 @@ func InvSin(id, password string) (string, string) {
 	var findR s.InvUser
 	c.Find(colQuierier).One(&findR)
 	if len(findR.Name) == 0 {
-		return "", "not in db"
-	}
-	checkPass := comparePasswords(findR.Password, []byte(password))
-	if checkPass != true {
-		return "", "bad pass"
+		return "not in db", "", ""
 	}
 
-	return findR.Name, "signIn"
+	checkPass := comparePasswords(findR.Password, []byte(password))
+	if checkPass != true {
+		return "bad pass", "", ""
+	}
+
+	return "signIn", findR.Name, findR.Number
 }
 
 func InvSup(id, name, number, password string) string {
@@ -52,9 +53,11 @@ func InvSup(id, name, number, password string) string {
 	c := session.DB(IDBNAME).C(ICOL)
 	var findR s.InvUser
 	c.Find(bson.M{"id": id}).One(&findR)
+
 	if len(findR.Name) != 0 {
 		return "in db"
 	}
+
 	hashPass := hashAndSalt([]byte(password))
 	err = c.Insert(&s.InvUser{Id: id, Name: name, Number: number, Password: hashPass})
 	if err != nil {
@@ -74,14 +77,14 @@ func VolSin(number, password string) (string, string) {
 	var findR s.VolUser
 	c.Find(colQuierier).One(&findR)
 	if len(findR.Number) == 0 {
-		return "", "not in db"
+		return "not in db", ""
 	}
 	checkPass := comparePasswords(findR.Password, []byte(password))
 	if checkPass != true {
-		return "", "bad pass"
+		return "bad pass", ""
 	}
 
-	return findR.Name, "signIn"
+	return "signIn", findR.Name
 }
 
 func VolSup(name, number, password string) string {
@@ -293,6 +296,52 @@ func ChangeVReview(number, review string) bool {
 		}
 	}
 	return true
+}
+
+func FindHelp(invId, volNumber string) (string, string, string) {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	volc := session.DB(VDBNAME).C(VCOL)
+	invc := session.DB(IDBNAME).C(ICOL)
+
+	// Vol Busy
+	var vol s.VolUser
+	vColQuierier := bson.M{"number": volNumber}
+	err = volc.Find(vColQuierier).One(&vol)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(vol.Number) == 0 {
+		return "bad", "not found", "..."
+	} else {
+		vBusy := bson.M{"$set": bson.M{"busy": true}}
+		err = volc.Update(vColQuierier, vBusy)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// Inv Busy
+	var inv s.InvUser
+	iColQuierier := bson.M{"id": invId}
+	err = invc.Find(iColQuierier).One(&inv)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(inv.Name) == 0 {
+		return "bad", "...", "not found"
+	} else {
+		iBusy := bson.M{"$set": bson.M{"busy": true}}
+		err = invc.Update(iColQuierier, iBusy)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return "nice", "busy", "busy"
 }
 
 func hashAndSalt(pwd []byte) string {

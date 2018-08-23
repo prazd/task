@@ -26,6 +26,7 @@ func main() {
 	http.HandleFunc("/vol/chrev", ChangeVRev)
 	http.HandleFunc("/vol/ch", VolHelp)
 	http.HandleFunc("/inv/nh", InvHelp)
+	http.HandleFunc("/findhelp", FHelp)
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -64,12 +65,14 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	name, sIn := mongo.InvSin(inv.Id, inv.Password)
+	sIn, name, number := mongo.InvSin(inv.Id, inv.Password)
 
 	resp := struct {
-		Resp string `json:"resp"`
-		Name string `json:"name"`
-	}{sIn, name}
+		Resp   string `json:"resp"`
+		Name   string `json:"name"`
+		Number string `json:"number"`
+	}{sIn, name, number}
+
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Fatal(bad)
@@ -113,12 +116,13 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	name, sIn := mongo.VolSin(vol.Number, vol.Password)
+	sIn, name := mongo.VolSin(vol.Number, vol.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
 		Name string `json:"name"`
 	}{sIn, name}
+
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Fatal(bad)
@@ -305,6 +309,30 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	rev := mongo.ChangeVReview(req.Number, req.Review)
 	js, excp := json.Marshal(bson.M{"resp": rev})
 	if excp != nil {
+		log.Fatal(err)
+	}
+	w.Write(js)
+}
+
+func FHelp(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	type Help struct {
+		Id     string
+		Number string
+	}
+	var help Help
+	err = json.Unmarshal(body, &help)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, rVol, rInv := mongo.FindHelp(help.Id, help.Number)
+
+	js, exc := json.Marshal(bson.M{"resp": resp, "inv": rInv, "vol": rVol})
+	if exc != nil {
 		log.Fatal(err)
 	}
 	w.Write(js)
