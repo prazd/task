@@ -67,9 +67,9 @@ func main() {
 			var resp string
 			for i, _ := range arr {
 				if i == 0 {
-					resp = "Готовы помочь:\n    🚹                   📱       👍   👎\n"
+					resp = "Готовы помочь:\n    🚹                   📱               👍     👎\n"
 				}
-				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + arr[i][2] + arr[i][3] + "\n"
+				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1]+"; Reviews    "+ arr[i][2] +"        "+ arr[i][3] + "\n"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
