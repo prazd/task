@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"log"
+	"strconv"
 
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -26,11 +27,13 @@ type InvUser struct {
 }
 
 type VolUser struct {
-	Name     string
-	Number   string
-	Geo      [2]string
-	Password string
-	CanHelp  bool
+	Name        string
+	Number      string
+	Geo         [2]string
+	Password    string
+	CanHelp     bool
+	GoodReviews int
+	BadReviews  int
 }
 
 func QV() int {
@@ -67,7 +70,7 @@ func QI() int {
 
 }
 
-func SV() [][2]string {
+func SV() [][4]string {
 	var allVol []VolUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
@@ -80,10 +83,10 @@ func SV() [][2]string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var result [][2]string
+	var result [][4]string
 	for i, _ := range allVol {
 		if allVol[i].CanHelp == true {
-			count := [2]string{allVol[i].Name, allVol[i].Number}
+			count := [4]string{allVol[i].Name, allVol[i].Number, strconv.Itoa(allVol[i].GoodReviews), strconv.Itoa(allVol[i].BadReviews)}
 			result = append(result, count)
 		}
 	}

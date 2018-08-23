@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strconv"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "token",
+		Token:  os.Getenv("BotToken"),
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 	if err != nil {
@@ -19,22 +20,22 @@ func main() {
 
 	volQ := tb.InlineButton{
 		Unique: "VQ",
-		Text:   "🏃 Vquant",
+		Text:   "🏃",
 	}
 
 	invQ := tb.InlineButton{
 		Unique: "IQ",
-		Text:   "♿ Iquant",
+		Text:   "♿",
 	}
 
 	volStatus := tb.InlineButton{
 		Unique: "VS",
-		Text:   "🆗 CanHelp",
+		Text:   "🆗",
 	}
 
 	invStatus := tb.InlineButton{
 		Unique: "IS",
-		Text:   "🆘 NeedHelp",
+		Text:   "🆘",
 	}
 
 	inlineKeys := [][]tb.InlineButton{
@@ -66,9 +67,9 @@ func main() {
 			var resp string
 			for i, _ := range arr {
 				if i == 0 {
-					resp = "Готовы помочь:\n    🚹                   📱\n"
+					resp = "Готовы помочь:\n    🚹                   📱       👍   👎\n"
 				}
-				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "\n"
+				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + arr[i][2] + arr[i][3] + "\n"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
