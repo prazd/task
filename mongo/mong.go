@@ -25,7 +25,7 @@ func InvSin(id, password string) (string, string, string) {
 
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(IDBNAME).C(ICOL)
@@ -47,7 +47,7 @@ func InvSin(id, password string) (string, string, string) {
 func InvSup(id, name, number, password string) string {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(IDBNAME).C(ICOL)
@@ -61,7 +61,7 @@ func InvSup(id, name, number, password string) string {
 	hashPass := hashAndSalt([]byte(password))
 	err = c.Insert(&s.InvUser{Id: id, Name: name, Number: number, Password: hashPass})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return "signUP"
 }
@@ -69,7 +69,7 @@ func InvSup(id, name, number, password string) string {
 func VolSin(number, password string) (string, string) {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
@@ -90,7 +90,7 @@ func VolSin(number, password string) (string, string) {
 func VolSup(name, number, password string) string {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
@@ -102,7 +102,7 @@ func VolSup(name, number, password string) string {
 	hashPass := hashAndSalt([]byte(password))
 	err = c.Insert(&s.VolUser{Name: name, Number: number, Password: hashPass})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return "signUP"
 }
@@ -110,7 +110,7 @@ func VolSup(name, number, password string) string {
 func VHelp(number, lat, long string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
@@ -125,7 +125,7 @@ func VHelp(number, lat, long string) bool {
 		status := bson.M{"$set": bson.M{"canhelp": true, "geo": geo}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		return true
 	}
@@ -134,7 +134,7 @@ func VHelp(number, lat, long string) bool {
 func IHelp(id, lat, long string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(IDBNAME).C(ICOL)
@@ -148,7 +148,7 @@ func IHelp(id, lat, long string) bool {
 		status := bson.M{"$set": bson.M{"needhelp": true, "geo": geo}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		return true
 	}
@@ -157,7 +157,7 @@ func IHelp(id, lat, long string) bool {
 func VolEx(number string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
@@ -170,7 +170,7 @@ func VolEx(number string) bool {
 		status := bson.M{"$set": bson.M{"canhelp": false}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		return true
 	}
@@ -179,7 +179,7 @@ func VolEx(number string) bool {
 func InvEx(id string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(IDBNAME).C(ICOL)
@@ -192,7 +192,7 @@ func InvEx(id string) bool {
 		status := bson.M{"$set": bson.M{"needhelp": false}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		return true
 	}
@@ -202,14 +202,14 @@ func GetGeoV() [][]string {
 	var fGeo []s.VolUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
 	c := session.DB(VDBNAME).C(VCOL)
 	err = c.Find(bson.M{}).All(&fGeo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	var result [][]string
@@ -227,14 +227,14 @@ func GetGeoI() [][]string {
 	var fGeo []s.InvUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
 	c := session.DB(IDBNAME).C(ICOL)
 	err = c.Find(bson.M{}).All(&fGeo)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	var result [][]string
@@ -251,14 +251,14 @@ func GetVolReviews(number string) (int, int) {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.
-			Fatal(err)
+			Println(err)
 	}
 	defer session.Close()
 	var vol s.VolUser
 	c := session.DB(VDBNAME).C(VCOL)
 	err = c.Find(bson.M{"number": number}).One(&vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return vol.GoodReviews, vol.BadReviews
 }
@@ -266,7 +266,7 @@ func GetVolReviews(number string) (int, int) {
 func ChangeVReview(number, review string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
@@ -274,7 +274,7 @@ func ChangeVReview(number, review string) bool {
 	colQuierier := bson.M{"number": number}
 	err = c.Find(colQuierier).One(&vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	if len(vol.Number) == 0 {
 		return false
@@ -283,13 +283,13 @@ func ChangeVReview(number, review string) bool {
 			rev := bson.M{"$set": bson.M{"badreviews": vol.BadReviews + 1}}
 			err = c.Update(colQuierier, rev)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		} else if review == "good" {
 			rev := bson.M{"$set": bson.M{"goodreviews": vol.GoodReviews + 1}}
 			err = c.Update(colQuierier, rev)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		} else {
 			return false
@@ -301,7 +301,7 @@ func ChangeVReview(number, review string) bool {
 func FindHelp(invId, volNumber string) (string, string, string) {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
@@ -313,7 +313,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 	vColQuierier := bson.M{"number": volNumber}
 	err = volc.Find(vColQuierier).One(&vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	if len(vol.Number) == 0 {
 		return "bad", "not found", "..."
@@ -321,7 +321,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 		vBusy := bson.M{"$set": bson.M{"busy": true}}
 		err = volc.Update(vColQuierier, vBusy)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 
@@ -330,7 +330,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 	iColQuierier := bson.M{"id": invId}
 	err = invc.Find(iColQuierier).One(&inv)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	if len(inv.Name) == 0 {
 		return "bad", "...", "not found"
@@ -338,7 +338,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 		iBusy := bson.M{"$set": bson.M{"busy": true}}
 		err = invc.Update(iColQuierier, iBusy)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 	return "nice", "busy", "busy"
@@ -347,7 +347,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 func hashAndSalt(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return string(hash)
 }

@@ -34,12 +34,12 @@ func main() {
 func InvSignUp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var inv s.InvUser
 	err = json.Unmarshal(body, &inv)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	up := mongo.InvSup(inv.Id, inv.Name, inv.Number, inv.Password)
@@ -50,7 +50,7 @@ func InvSignUp(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 }
@@ -58,12 +58,12 @@ func InvSignUp(w http.ResponseWriter, r *http.Request) {
 func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var inv s.InvUser
 	err = json.Unmarshal(body, &inv)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	sIn, name, number := mongo.InvSin(inv.Id, inv.Password)
 
@@ -75,7 +75,7 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 }
@@ -83,13 +83,13 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 func VolSignUp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	var vol s.VolUser
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	up := mongo.VolSup(vol.Name, vol.Number, vol.Password)
@@ -100,7 +100,7 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 
@@ -109,12 +109,12 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var vol s.VolUser
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	sIn, name := mongo.VolSin(vol.Number, vol.Password)
 
@@ -125,7 +125,7 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 
@@ -134,7 +134,7 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 func VolHelp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	type canHelp struct {
@@ -147,7 +147,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &ch)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	help := mongo.VHelp(ch.Number, ch.Latitude, ch.Longitude)
@@ -157,7 +157,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 }
@@ -165,7 +165,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 func InvHelp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	type needHelp struct {
@@ -178,7 +178,7 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &nh)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	help := mongo.IHelp(nh.Id, nh.Latitude, nh.Longitude)
@@ -188,7 +188,7 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 }
@@ -196,13 +196,13 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 func VolExit(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	var vol s.VolUser
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	help := mongo.VolEx(vol.Number)
@@ -212,7 +212,7 @@ func VolExit(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 }
@@ -220,13 +220,13 @@ func VolExit(w http.ResponseWriter, r *http.Request) {
 func InvExit(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	var inv s.InvUser
 	err = json.Unmarshal(body, &inv)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	help := mongo.InvEx(inv.Id)
@@ -236,7 +236,7 @@ func InvExit(w http.ResponseWriter, r *http.Request) {
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
-		log.Fatal(bad)
+		log.Println(bad)
 	}
 	w.Write(js)
 }
@@ -248,7 +248,7 @@ func VGeoList(w http.ResponseWriter, r *http.Request) {
 	}{Resp: geolist}
 	js, err := json.Marshal(resp)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	w.Write(js)
 }
@@ -260,7 +260,7 @@ func IGeoList(w http.ResponseWriter, r *http.Request) {
 	}{Resp: geolist}
 	js, err := json.Marshal(resp)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	w.Write(js)
 }
@@ -269,12 +269,12 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var vol s.VolUser
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	good, bad := mongo.GetVolReviews(vol.Number)
@@ -286,7 +286,7 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 
 	js, excp := json.Marshal(resp)
 	if excp != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	w.Write(js)
 }
@@ -294,7 +294,7 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	type Req struct {
@@ -304,12 +304,12 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	var req Req
 	err = json.Unmarshal(body, &req)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	rev := mongo.ChangeVReview(req.Number, req.Review)
 	js, excp := json.Marshal(bson.M{"resp": rev})
 	if excp != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	w.Write(js)
 }
@@ -317,7 +317,7 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 func FHelp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	type Help struct {
@@ -327,13 +327,13 @@ func FHelp(w http.ResponseWriter, r *http.Request) {
 	var help Help
 	err = json.Unmarshal(body, &help)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	resp, rVol, rInv := mongo.FindHelp(help.Id, help.Number)
 
 	js, exc := json.Marshal(bson.M{"resp": resp, "inv": rInv, "vol": rVol})
 	if exc != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	w.Write(js)
 }

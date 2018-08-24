@@ -40,14 +40,14 @@ func QV() int {
 	var allVol []VolUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
 	c := session.DB(VDBNAME).C(VCOL)
 	err = c.Find(bson.M{}).All(&allVol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return len(allVol)
 
@@ -57,14 +57,14 @@ func QI() int {
 	var allInv []InvUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
 	c := session.DB(IDBNAME).C(ICOL)
 	err = c.Find(bson.M{}).All(&allInv)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return len(allInv)
 
@@ -74,14 +74,14 @@ func SV() [][4]string {
 	var allVol []VolUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
 	c := session.DB(VDBNAME).C(VCOL)
 	err = c.Find(bson.M{}).All(&allVol)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var result [][4]string
 	for i, _ := range allVol {
@@ -97,14 +97,14 @@ func SI() [][2]string {
 	var allInv []InvUser
 	session, err := mgo.Dial(CONN)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer session.Close()
 
 	c := session.DB(IDBNAME).C(ICOL)
 	err = c.Find(bson.M{}).All(&allInv)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var result [][2]string
 	for i, _ := range allInv {
