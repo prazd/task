@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"./mongo"
+	portscanner "github.com/anvie/port-scanner"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -38,8 +39,13 @@ func main() {
 		Text:   "🆘",
 	}
 
+	ServicesStatus := tb.InlineButton{
+		Unique: "MS",
+		Text:   "🍃",
+	}
+
 	inlineKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{volQ, invQ, volStatus, invStatus},
+		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -69,7 +75,7 @@ func main() {
 				if i == 0 {
 					resp = "Готовы помочь:\n    🚹                   📱               👍     👎\n"
 				}
-				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1]+"; Reviews    "+ arr[i][2] +"        "+ arr[i][3] + "\n"
+				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "; Reviews    " + arr[i][2] + "        " + arr[i][3] + "\n"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -87,6 +93,30 @@ func main() {
 				}
 				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "\n"
 			}
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: inlineKeys,
+			})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&ServicesStatus, func(c *tb.Callback) {
+			ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+			mongoPort := ps.IsOpen(27017)
+			serverPort := ps.IsOpen(3000)
+			var mongoS, serverS string
+			if mongoPort == true {
+				mongoS = "✔"
+			} else {
+				mongoS = "✖"
+			}
+
+			if serverPort == true {
+				serverS = "✔"
+			} else {
+				serverS = "✖"
+			}
+			resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
+
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
 				InlineKeyboard: inlineKeys,
 			})

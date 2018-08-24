@@ -6,6 +6,7 @@ WORKDIR /gobot
 RUN go get gopkg.in/tucnak/telebot.v2
 RUN go get gopkg.in/mgo.v2
 RUN go get gopkg.in/mgo.v2/bson
+RUN go get github.com/anvie/port-scanner
 
 RUN go build bot.go
 
