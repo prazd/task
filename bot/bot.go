@@ -219,7 +219,7 @@ func main() {
 		})
 
 		b.Handle(&BackToServices, func(c *tb.Callback) {
-			b.Edit(c.Message, "Services monitoring", &tb.ReplyMarkup{
+			b.Edit(c.Message, "Services", &tb.ReplyMarkup{
 				InlineKeyboard: servicesInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
