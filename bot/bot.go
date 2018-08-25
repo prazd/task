@@ -228,15 +228,15 @@ func main() {
 		b.Handle(&MongoStop, func(c *tb.Callback) {
 			mongocmd := exec.Command("systemctl", "stop", "mongodb")
 			err := mongocmd.Run()
-			resp := "Mongo: ✖"
+			resp := "Mongo: ✔"
 			if err != nil {
 				log.Println(err)
 			} else {
-				resp = "Mongo: ✔"
+				resp = "Mongo: ✖"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline})
+				InlineKeyboard: mongoInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
@@ -251,7 +251,7 @@ func main() {
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline})
+				InlineKeyboard: mongoInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
@@ -266,7 +266,7 @@ func main() {
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline})
+				InlineKeyboard: mongoInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
