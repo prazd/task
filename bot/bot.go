@@ -210,9 +210,17 @@ func main() {
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
+		// Back Handle
+
 		b.Handle(&BackToMain, func(c *tb.Callback) {
 			b.Edit(c.Message, "Monitoring info in mongodb", &tb.ReplyMarkup{
 				InlineKeyboard: mainInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&BackToServices, func(c *tb.Callback) {
+			b.Edit(c.Message, "Services monitoring", &tb.ReplyMarkup{
+				InlineKeyboard: servicesInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
