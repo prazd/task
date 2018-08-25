@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -44,8 +46,18 @@ func main() {
 		Text:   "🍃",
 	}
 
+	MongoLog := tb.InlineButton{
+		Unique: "ML",
+		Text:   "Mongo📄",
+	}
+
+	ServerLog := tb.InlineButton{
+		Unique: "SL",
+		Text:   "Server📄",
+	}
+
 	inlineKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus},
+		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus, MongoLog, ServerLog},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -116,6 +128,31 @@ func main() {
 				serverS = "✖"
 			}
 			resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: inlineKeys,
+			})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+		b.Handle(&MongoLog, func(c *tb.Callback) {
+			logfile, err := ioutil.ReadFile("bot.log")
+			if err != nil {
+				log.Println(err)
+			}
+			resp := string(logfile)
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: inlineKeys,
+			})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&ServerLog, func(c *tb.Callback) {
+			logfile, err := ioutil.ReadFile("main.log")
+			if err != nil {
+				log.Println(err)
+			}
+			resp := string(logfile)
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
 				InlineKeyboard: inlineKeys,
