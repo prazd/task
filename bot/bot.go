@@ -236,11 +236,11 @@ func main() {
 		b.Handle(&MongoStop, func(c *tb.Callback) {
 			mongocmd := exec.Command("systemctl", "stop", "mongodb")
 			err := mongocmd.Run()
-			resp := "Mongo: ✔"
+			resp := "Mongo: Not stopped ✔"
 			if err != nil {
 				log.Println(err)
 			} else {
-				resp = "Mongo: ✖"
+				resp = "Mongo: Stopped ✖"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -251,11 +251,11 @@ func main() {
 		b.Handle(&MongoStart, func(c *tb.Callback) {
 			mongocmd := exec.Command("systemctl", "start", "mongodb")
 			err := mongocmd.Run()
-			resp := "Mongo: ✖"
+			resp := "Mongo: Not Start ✖"
 			if err != nil {
 				log.Println(err)
 			} else {
-				resp = "Mongo: ✔"
+				resp = "Mongo: Start ✔"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -266,11 +266,11 @@ func main() {
 		b.Handle(&MongoReboot, func(c *tb.Callback) {
 			mongocmd := exec.Command("systemctl", "restart", "mongodb")
 			err := mongocmd.Run()
-			resp := "Mongo: ✖"
+			resp := "Mongo: not reboot ✖"
 			if err != nil {
 				log.Println(err)
 			} else {
-				resp = "Mongo: ✔"
+				resp = "Mongo: reboot ✔"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
