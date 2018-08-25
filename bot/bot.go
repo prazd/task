@@ -44,7 +44,7 @@ func main() {
 
 	ServicesStatus := tb.InlineButton{
 		Unique: "SS",
-		Text:   "🍃",
+		Text:   "Status",
 	}
 
 	BotLog := tb.InlineButton{
@@ -62,18 +62,32 @@ func main() {
 		Text:   "S📄",
 	}
 
-	inlineKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus, BotLog, ServerLog, MongoService},
+	Services := tb.InlineButton{
+		Unique: "S",
+		Text:   "🍃",
+	}
+
+	Back := tb.InlineButton{
+		Unique: "Back",
+		Text:   "Back",
+	}
+
+	mainInline := [][]tb.InlineButton{
+		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, Services},
+	}
+
+	servicesInline := [][]tb.InlineButton{
+		[]tb.InlineButton{ServerLog, MongoService, ServicesStatus, BotLog, Back},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
 		b.Send(m.Sender, "Привет!Я помогу в мониторинге", &tb.ReplyMarkup{
-			InlineKeyboard: inlineKeys,
+			InlineKeyboard: mainInline,
 		})
 		b.Handle(&volQ, func(c *tb.Callback) {
 			resp := mongo.QV()
 			b.Edit(c.Message, "ℹ Vquantity: "+strconv.Itoa(resp), &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -81,7 +95,7 @@ func main() {
 		b.Handle(&invQ, func(c *tb.Callback) {
 			resp := mongo.QI()
 			b.Edit(c.Message, "ℹ Iquantity: "+strconv.Itoa(resp), &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -97,7 +111,7 @@ func main() {
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -112,7 +126,7 @@ func main() {
 				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "\n"
 			}
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -136,7 +150,7 @@ func main() {
 			resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -148,7 +162,7 @@ func main() {
 			resp := string(logfile)
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -161,7 +175,7 @@ func main() {
 			resp := string(logfile)
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys,
+				InlineKeyboard: mainInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -177,7 +191,22 @@ func main() {
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: inlineKeys})
+				InlineKeyboard: mainInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&Services, func(c *tb.Callback) {
+			mongocmd := exec.Command("systemctl", "restart", "mongodb")
+			err := mongocmd.Run()
+			resp := "Mongo: ✖"
+			if err != nil {
+				log.Println(err)
+			} else {
+				resp = "Mongo: ✔"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: servicesInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
