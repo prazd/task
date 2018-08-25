@@ -46,18 +46,18 @@ func main() {
 		Text:   "🍃",
 	}
 
-	MongoLog := tb.InlineButton{
+	BotLog := tb.InlineButton{
 		Unique: "ML",
-		Text:   "Mongo📄",
+		Text:   "B📄",
 	}
 
 	ServerLog := tb.InlineButton{
 		Unique: "SL",
-		Text:   "Server📄",
+		Text:   "S📄",
 	}
 
 	inlineKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus, MongoLog, ServerLog},
+		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus, BotLog, ServerLog},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -134,7 +134,7 @@ func main() {
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
-		b.Handle(&MongoLog, func(c *tb.Callback) {
+		b.Handle(&BotLog, func(c *tb.Callback) {
 			logfile, err := ioutil.ReadFile("bot.log")
 			if err != nil {
 				log.Println(err)
