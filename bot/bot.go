@@ -57,9 +57,19 @@ func main() {
 		Text:   "S📄",
 	}
 
-	MongoService := tb.InlineButton{
-		Unique: "MS",
-		Text:   "🍃",
+	MongoReboot := tb.InlineButton{
+		Unique: "MR",
+		Text:   "Reboot",
+	}
+
+	MongoStop := tb.InlineButton{
+		Unique: "MStop",
+		Text:   "Stop",
+	}
+
+	MongoStart := tb.InlineButton{
+		Unique: "MStop",
+		Text:   "Start",
 	}
 
 	Services := tb.InlineButton{
@@ -67,9 +77,23 @@ func main() {
 		Text:   "Services",
 	}
 
-	Back := tb.InlineButton{
-		Unique: "Back",
+	BackToMain := tb.InlineButton{
+		Unique: "BM",
+		Text:   "Main",
+	}
+
+	BackToServices := tb.InlineButton{
+		Unique: "BS",
 		Text:   "Back",
+	}
+
+	MongoServices := tb.InlineButton{
+		Unique: "BS",
+		Text:   "MongoDB",
+	}
+
+	mongoInline := [][]tb.InlineButton{
+		[]tb.InlineButton{MongoStart, MongoStop, MongoReboot, BackToServices, BackToMain},
 	}
 
 	mainInline := [][]tb.InlineButton{
@@ -77,7 +101,7 @@ func main() {
 	}
 
 	servicesInline := [][]tb.InlineButton{
-		[]tb.InlineButton{MongoService, ServicesStatus, BotLog, ServerLog, Back},
+		[]tb.InlineButton{MongoServices, ServicesStatus, BotLog, ServerLog, BackToMain},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -180,41 +204,73 @@ func main() {
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
-		b.Handle(&MongoService, func(c *tb.Callback) {
-			mongocmd := exec.Command("systemctl", "restart", "mongodb")
-			err := mongocmd.Run()
-			resp := "Mongo: ✖"
-			if err != nil {
-				log.Println(err)
-			} else {
-				resp = "Mongo: ✔"
-			}
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
 		b.Handle(&Services, func(c *tb.Callback) {
-			mongocmd := exec.Command("systemctl", "restart", "mongodb")
-			err := mongocmd.Run()
-			resp := "Mongo: ✖"
-			if err != nil {
-				log.Println(err)
-			} else {
-				resp = "Mongo: ✔"
-			}
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+			b.Edit(c.Message, "Services monitoring", &tb.ReplyMarkup{
 				InlineKeyboard: servicesInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
-		b.Handle(&Back, func(c *tb.Callback) {
-			b.Edit(c.Message, "Мониторинг записей в бд", &tb.ReplyMarkup{
+		b.Handle(&BackToMain, func(c *tb.Callback) {
+			b.Edit(c.Message, "Monitoring info in mongodb", &tb.ReplyMarkup{
 				InlineKeyboard: mainInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
+
+		// Services
+		// Mongo
+
+		b.Handle(&MongoServices, func(c *tb.Callback) {
+			b.Edit(c.Message, "Mongo", &tb.ReplyMarkup{
+				InlineKeyboard: mongoInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&MongoStop, func(c *tb.Callback) {
+			mongocmd := exec.Command("systemctl", "stop", "mongodb")
+			err := mongocmd.Run()
+			resp := "Mongo: ✖"
+			if err != nil {
+				log.Println(err)
+			} else {
+				resp = "Mongo: ✔"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: servicesInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&MongoStart, func(c *tb.Callback) {
+			mongocmd := exec.Command("systemctl", "start", "mongodb")
+			err := mongocmd.Run()
+			resp := "Mongo: ✖"
+			if err != nil {
+				log.Println(err)
+			} else {
+				resp = "Mongo: ✔"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: servicesInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&MongoReboot, func(c *tb.Callback) {
+			mongocmd := exec.Command("systemctl", "restart", "mongodb")
+			err := mongocmd.Run()
+			resp := "Mongo: ✖"
+			if err != nil {
+				log.Println(err)
+			} else {
+				resp = "Mongo: ✔"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: servicesInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		//Server ....
 
 	})
 
