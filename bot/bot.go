@@ -211,7 +211,7 @@ func main() {
 		})
 
 		b.Handle(&Back, func(c *tb.Callback) {
-			b.Edit(c.Message, &tb.ReplyMarkup{
+			b.Edit(c.Message, "Мониторинг записей в бд", &tb.ReplyMarkup{
 				InlineKeyboard: mainInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
