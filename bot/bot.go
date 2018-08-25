@@ -59,12 +59,12 @@ func main() {
 
 	MongoService := tb.InlineButton{
 		Unique: "MS",
-		Text:   "S📄",
+		Text:   "🍃",
 	}
 
 	Services := tb.InlineButton{
 		Unique: "S",
-		Text:   "🍃",
+		Text:   "Services",
 	}
 
 	Back := tb.InlineButton{
@@ -77,7 +77,7 @@ func main() {
 	}
 
 	servicesInline := [][]tb.InlineButton{
-		[]tb.InlineButton{ServerLog, MongoService, ServicesStatus, BotLog, Back},
+		[]tb.InlineButton{MongoService, ServicesStatus, BotLog, ServerLog, Back},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -150,7 +150,7 @@ func main() {
 			resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mainInline,
+				InlineKeyboard: servicesInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -162,7 +162,7 @@ func main() {
 			resp := string(logfile)
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mainInline,
+				InlineKeyboard: servicesInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -175,7 +175,7 @@ func main() {
 			resp := string(logfile)
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mainInline,
+				InlineKeyboard: servicesInline,
 			})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
@@ -191,7 +191,7 @@ func main() {
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mainInline})
+				InlineKeyboard: servicesInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
@@ -207,6 +207,12 @@ func main() {
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
 				InlineKeyboard: servicesInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&Back, func(c *tb.Callback) {
+			b.Edit(c.Message, &tb.ReplyMarkup{
+				InlineKeyboard: mainInline})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
