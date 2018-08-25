@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	ServicesStatus := tb.InlineButton{
-		Unique: "MS",
+		Unique: "SS",
 		Text:   "🍃",
 	}
 
@@ -56,8 +57,13 @@ func main() {
 		Text:   "S📄",
 	}
 
+	MongoService := tb.InlineButton{
+		Unique: "MS",
+		Text:   "S📄",
+	}
+
 	inlineKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus, BotLog, ServerLog},
+		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, ServicesStatus, BotLog, ServerLog, MongoService},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -157,6 +163,21 @@ func main() {
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
 				InlineKeyboard: inlineKeys,
 			})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&MongoService, func(c *tb.Callback) {
+			mongocmd := exec.Command("systemctl", "restart", "mongodb")
+			err := mongocmd.Run()
+			resp := "Mongo: ✖"
+			if err != nil {
+				log.Println(err)
+			} else {
+				resp = "Mongo: ✔"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: inlineKeys})
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
