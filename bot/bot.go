@@ -309,26 +309,14 @@ func main() {
 		})
 
 		b.Handle(&ServerStop, func(c *tb.Callback) {
+			b.Edit(c.Message, "Find ID of process...", &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
 			// Find id of processs
-			serverID := exec.Command("lsof", "-t", "-i:3000")
-			sOut, sErr := serverID.CombinedOutput()
-			if sErr != nil {
-				log.Println(sErr)
-			}
-			err := serverID.Run()
-			if err != nil {
-				log.Println(err)
-			} else {
-				b.Edit(c.Message, "Take process ID...", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
-			}
-
-			ID := string(sOut)
-			ID = strings.Replace(ID, "\n", "", -1)
+			ID := FindID()
 
 			// Stop Server
 			serverkillcmd := exec.Command("kill", "-9", ID)
-			_, sErr = serverkillcmd.CombinedOutput()
+			_, sErr := serverkillcmd.CombinedOutput()
 			if sErr != nil {
 				log.Println(err)
 			} else {
@@ -342,17 +330,7 @@ func main() {
 			}
 
 			// Check status of process
-			checkStatus := exec.Command("lsof", "-t", "-i:3000")
-			sOut, sErr = serverID.CombinedOutput()
-			if sErr != nil {
-				log.Println(sErr)
-			}
-			err = checkStatus.Run()
-			if err != nil {
-				log.Println(err)
-			}
-
-			ID = string(sOut)
+			ID = CS()
 			var resp string
 
 			if len(ID) == 0 {
@@ -369,7 +347,15 @@ func main() {
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
 
-			serverStart := exec.Command("./Server.sh")
+			serverStart := exec.Command("./main")
+			file, err := os.Create("./main.log")
+			if err != nil {
+				log.Println(err)
+			}
+			defer file.Close()
+
+			serverStart.Stderr = file
+
 			err = serverStart.Run()
 			if err != nil {
 				log.Println(err)
@@ -386,4 +372,34 @@ func main() {
 	})
 
 	b.Start()
+}
+
+func FindID() string {
+	serverID := exec.Command("lsof", "-t", "-i:3000")
+	sOut, sErr := serverID.CombinedOutput()
+	if sErr != nil {
+		log.Println(sErr)
+	}
+	err := serverID.Run()
+	if err != nil {
+		log.Println(err)
+	}
+	ID := string(sOut)
+	ID = strings.Replace(ID, "\n", "", -1)
+	return ID
+}
+
+func CS() string {
+	checkStatus := exec.Command("lsof", "-t", "-i:3000")
+	sOut, sErr := checkStatus.CombinedOutput()
+	if sErr != nil {
+		log.Println(sErr)
+	}
+	err := checkStatus.Run()
+	if err != nil {
+		log.Println(err)
+	}
+
+	ID := string(sOut)
+	return ID
 }
