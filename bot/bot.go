@@ -309,6 +309,7 @@ func main() {
 		})
 
 		b.Handle(&ServerStop, func(c *tb.Callback) {
+
 			b.Edit(c.Message, "Find ID of process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 			// Find id of processs
@@ -318,13 +319,13 @@ func main() {
 			serverkillcmd := exec.Command("kill", "-9", ID)
 			_, sErr := serverkillcmd.CombinedOutput()
 			if sErr != nil {
-				log.Println(err)
+				log.Println(sErr)
 			} else {
 				b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			}
 
-			err = serverkillcmd.Run()
+			err := serverkillcmd.Run()
 			if err != nil {
 				log.Println(err)
 			}
@@ -390,6 +391,7 @@ func FindID() string {
 }
 
 func CS() string {
+
 	checkStatus := exec.Command("lsof", "-t", "-i:3000")
 	sOut, sErr := checkStatus.CombinedOutput()
 	if sErr != nil {
