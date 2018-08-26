@@ -379,10 +379,6 @@ func PID() string {
 	if sErr != nil {
 		log.Println(sErr)
 	}
-	err := serverID.Run()
-	if err != nil {
-		log.Println(err)
-	}
 	ID := string(sOut)
 	ID = strings.Replace(ID, "\n", "", -1)
 	return ID
