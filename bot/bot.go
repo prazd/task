@@ -316,19 +316,19 @@ func main() {
 			ID := FindID()
 
 			// Stop Server
-			serverkillcmd := exec.Command("kill", "-9", ID)
-			_, sErr := serverkillcmd.CombinedOutput()
-			if sErr != nil {
-				log.Println(sErr)
+			b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
+
+			kill := KillServer(ID)
+			if kill == false {
+				b.Edit(c.Message, "Not Kill", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
 			} else {
-				b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
+				b.Edit(c.Message, "shut down", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			}
-
-			err := serverkillcmd.Run()
-			if err != nil {
-				log.Println(err)
-			}
+			b.Edit(c.Message, "Check Status", &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
 
 			// Check status of process
 			ID = CS()
@@ -404,4 +404,19 @@ func CS() string {
 
 	ID := string(sOut)
 	return ID
+}
+
+func KillServer(ID string) bool {
+	serverkillcmd := exec.Command("kill", "-9", ID)
+	_, sErr := serverkillcmd.CombinedOutput()
+	if sErr != nil {
+		log.Println(sErr)
+	}
+	err := serverkillcmd.Run()
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+
 }
