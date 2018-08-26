@@ -369,16 +369,7 @@ func main() {
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
 
-			serverStart := exec.Command("./main")
-
-			file, err := os.Create("./main.log")
-			if err != nil {
-				log.Println(err)
-			}
-			defer file.Close()
-
-			serverStart.Stderr = file
-
+			serverStart := exec.Command("./Server.sh")
 			err = serverStart.Run()
 			if err != nil {
 				log.Println(err)
@@ -388,23 +379,6 @@ func main() {
 				b.Edit(c.Message, "Start", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			}
-
-			// checkStatus := exec.Command("lsof", "-t", "-i:3000")
-			// sOut, sErr := checkStatus.CombinedOutput()
-			// if sErr != nil {
-			// 	log.Println(sErr)
-			// }
-			// err = checkStatus.Run()
-			// if err != nil {
-			// 	log.Println(err)
-			// }
-			// if len(sOut) == 0 {
-			// 	b.Edit(c.Message, "Server hasn't start", &tb.ReplyMarkup{
-			// 		InlineKeyboard: serverInline})
-			// } else {
-			// 	b.Edit(c.Message, "Server has start", &tb.ReplyMarkup{
-			// 		InlineKeyboard: serverInline})
-			// }
 
 			b.Respond(c, &tb.CallbackResponse{})
 		})
