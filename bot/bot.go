@@ -370,6 +370,7 @@ func main() {
 		b.Handle(&ServerStart, func(c *tb.Callback) {
 
 			serverStart := exec.Command("./main")
+
 			file, err := os.Create("./main.log")
 			if err != nil {
 				log.Println(err)
@@ -381,6 +382,8 @@ func main() {
 			err = serverStart.Run()
 			if err != nil {
 				log.Println(err)
+				b.Edit(c.Message, "Not Starting server...", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
 			} else {
 				b.Edit(c.Message, "Starting server...", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
