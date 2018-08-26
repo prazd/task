@@ -368,8 +368,17 @@ func main() {
 		})
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
-			serverStart := exec.Command("./main", "2>", "server.log")
-			err := serverStart.Run()
+
+			serverStart := exec.Command("./main")
+			file, err := os.Create("./main.log")
+			if err != nil {
+				log.Println(err)
+			}
+			defer file.Close()
+
+			serverStart.Stderr = file
+
+			err = serverStart.Run()
 			if err != nil {
 				log.Println(err)
 			} else {
