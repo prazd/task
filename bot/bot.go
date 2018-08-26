@@ -349,11 +349,21 @@ func main() {
 		})
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
-			serverStart := exec.Command("./Server.sh")
-			serverStart.Run()
-			b.Edit(c.Message, "Start", &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-			b.Respond(c, &tb.CallbackResponse{})
+			// serverStart := exec.Command("./Server.sh")
+			// serverStart.Run()
+			// b.Edit(c.Message, "Start", &tb.ReplyMarkup{
+			// 	InlineKeyboard: serverInline})
+			// b.Respond(c, &tb.CallbackResponse{})
+			go func() {
+				serverStart := exec.Command("./Server.sh")
+				err := serverStart.Run()
+				if err != nil {
+					log.Println(err)
+				}
+				b.Edit(c.Message, "Start", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			}()
 		})
 
 	})
