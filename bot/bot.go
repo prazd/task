@@ -320,6 +320,7 @@ func main() {
 				InlineKeyboard: serverInline})
 
 			kill := KillServer(ID)
+
 			if kill == false {
 				b.Edit(c.Message, "Not Kill", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
@@ -327,6 +328,7 @@ func main() {
 				b.Edit(c.Message, "shut down", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			}
+
 			b.Edit(c.Message, "Check Status", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 
@@ -347,19 +349,8 @@ func main() {
 		})
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
-			serverStart := exec.Command("./main")
-			file, err := os.Create("./main.log")
-			if err != nil {
-				log.Println(err)
-			}
-			defer file.Close()
-			serverStart.Stderr = file
-			err = serverStart.Run()
-
-			if err != nil {
-				log.Println(err)
-			}
-
+			serverStart := exec.Command("./Server.sh")
+			serverStart.Run()
 			b.Edit(c.Message, "Start", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 			b.Respond(c, &tb.CallbackResponse{})
@@ -371,6 +362,7 @@ func main() {
 }
 
 func PID() string {
+
 	serverID := exec.Command("lsof", "-t", "-i:3000")
 	sOut, sErr := serverID.CombinedOutput()
 	if sErr != nil {
