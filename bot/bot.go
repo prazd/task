@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"./mongo"
@@ -57,21 +58,6 @@ func main() {
 		Text:   "S📄",
 	}
 
-	MongoReboot := tb.InlineButton{
-		Unique: "MR",
-		Text:   "Reboot",
-	}
-
-	MongoStop := tb.InlineButton{
-		Unique: "MStop",
-		Text:   "Stop",
-	}
-
-	MongoStart := tb.InlineButton{
-		Unique: "MStart",
-		Text:   "Start",
-	}
-
 	Services := tb.InlineButton{
 		Unique: "S",
 		Text:   "Services",
@@ -87,9 +73,45 @@ func main() {
 		Text:   "Back",
 	}
 
+	// Mongo
 	MongoServices := tb.InlineButton{
 		Unique: "MongServ",
 		Text:   "MongoDB",
+	}
+
+	MongoReboot := tb.InlineButton{
+		Unique: "MR",
+		Text:   "Reboot",
+	}
+
+	MongoStop := tb.InlineButton{
+		Unique: "MStop",
+		Text:   "Stop",
+	}
+
+	MongoStart := tb.InlineButton{
+		Unique: "MStart",
+		Text:   "Start",
+	}
+
+	// Server
+	GoServer := tb.InlineButton{
+		Unique: "GS",
+		Text:   "Server",
+	}
+
+	ServerStart := tb.InlineButton{
+		Unique: "ServStart",
+		Text:   "Start",
+	}
+
+	ServerStop := tb.InlineButton{
+		Unique: "ServStop",
+		Text:   "Stop",
+	}
+
+	serverInline := [][]tb.InlineButton{
+		[]tb.InlineButton{ServerStart, ServerStop, ServerLog, BackToServices, BackToMain},
 	}
 
 	mongoInline := [][]tb.InlineButton{
@@ -101,7 +123,7 @@ func main() {
 	}
 
 	servicesInline := [][]tb.InlineButton{
-		[]tb.InlineButton{MongoServices, ServicesStatus, BotLog, ServerLog, BackToMain},
+		[]tb.InlineButton{MongoServices, GoServer, ServicesStatus, BotLog, BackToMain},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
@@ -278,7 +300,102 @@ func main() {
 			b.Respond(c, &tb.CallbackResponse{})
 		})
 
-		//Server ....
+		//Server
+
+		b.Handle(&GoServer, func(c *tb.Callback) {
+			b.Edit(c.Message, "Server", &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
+
+		b.Handle(&ServerStop, func(c *tb.Callback) {
+			// Find id of processs
+			serverID := exec.Command("lsof", "-t", "-i:3000")
+			sOut, sErr := serverID.CombinedOutput()
+			if sErr != nil {
+				log.Println(sErr)
+			}
+			err := serverID.Run()
+			if err != nil {
+				log.Println(err)
+			} else {
+				b.Edit(c.Message, "Take process ID...", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+			}
+
+			ID := string(sOut)
+			ID = strings.Replace(ID, "\n", "", -1)
+
+			// Stop Server
+			serverkillcmd := exec.Command("kill", "-9", ID)
+			_, sErr = serverkillcmd.CombinedOutput()
+			if sErr != nil {
+				log.Println(err)
+			} else {
+				b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+			}
+
+			err = serverkillcmd.Run()
+			if err != nil {
+				log.Println(err)
+			}
+
+			// Check status of process
+			checkStatus := exec.Command("lsof", "-t", "-i:3000")
+			sOut, sErr = serverID.CombinedOutput()
+			if sErr != nil {
+				log.Println(sErr)
+			}
+			err = checkStatus.Run()
+			if err != nil {
+				log.Println(err)
+			}
+
+			ID = string(sOut)
+			var resp string
+
+			if len(ID) == 0 {
+				resp = "Server has stopped"
+			} else {
+				resp = "Server hasn't stopped"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
+			b.Respond(c, &tb.CallbackResponse{})
+
+		})
+
+		b.Handle(&ServerStart, func(c *tb.Callback) {
+			serverStart := exec.Command("./main", "2>", "server.log")
+			err := serverStart.Run()
+			if err != nil {
+				log.Println(err)
+			} else {
+				b.Edit(c.Message, "Starting server...", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+			}
+
+			checkStatus := exec.Command("lsof", "-t", "-i:3000")
+			sOut, sErr := checkStatus.CombinedOutput()
+			if sErr != nil {
+				log.Println(sErr)
+			}
+			err = checkStatus.Run()
+			if err != nil {
+				log.Println(err)
+			}
+			if len(sOut) == 0 {
+				b.Edit(c.Message, "Server hasn't start", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+			} else {
+				b.Edit(c.Message, "Server has start", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+			}
+
+			b.Respond(c, &tb.CallbackResponse{})
+		})
 
 	})
 
