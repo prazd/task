@@ -382,29 +382,29 @@ func main() {
 			err = serverStart.Run()
 			if err != nil {
 				log.Println(err)
-				b.Edit(c.Message, "Not Starting server...", &tb.ReplyMarkup{
+				b.Edit(c.Message, "Stop", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			} else {
-				b.Edit(c.Message, "Starting server...", &tb.ReplyMarkup{
+				b.Edit(c.Message, "Start", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			}
 
-			checkStatus := exec.Command("lsof", "-t", "-i:3000")
-			sOut, sErr := checkStatus.CombinedOutput()
-			if sErr != nil {
-				log.Println(sErr)
-			}
-			err = checkStatus.Run()
-			if err != nil {
-				log.Println(err)
-			}
-			if len(sOut) == 0 {
-				b.Edit(c.Message, "Server hasn't start", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
-			} else {
-				b.Edit(c.Message, "Server has start", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
-			}
+			// checkStatus := exec.Command("lsof", "-t", "-i:3000")
+			// sOut, sErr := checkStatus.CombinedOutput()
+			// if sErr != nil {
+			// 	log.Println(sErr)
+			// }
+			// err = checkStatus.Run()
+			// if err != nil {
+			// 	log.Println(err)
+			// }
+			// if len(sOut) == 0 {
+			// 	b.Edit(c.Message, "Server hasn't start", &tb.ReplyMarkup{
+			// 		InlineKeyboard: serverInline})
+			// } else {
+			// 	b.Edit(c.Message, "Server has start", &tb.ReplyMarkup{
+			// 		InlineKeyboard: serverInline})
+			// }
 
 			b.Respond(c, &tb.CallbackResponse{})
 		})
