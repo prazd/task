@@ -313,7 +313,7 @@ func main() {
 			b.Edit(c.Message, "Find ID of process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 			// Find id of processs
-			ID := FindID()
+			ID := PID()
 
 			// Stop Server
 			b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
@@ -331,7 +331,7 @@ func main() {
 				InlineKeyboard: serverInline})
 
 			// Check status of process
-			ID = CS()
+			ID = PID()
 			var resp string
 
 			if len(ID) == 0 {
@@ -349,6 +349,7 @@ func main() {
 		b.Handle(&ServerStart, func(c *tb.Callback) {
 
 			serverStart := exec.Command("./main")
+
 			file, err := os.Create("./main.log")
 			if err != nil {
 				log.Println(err)
@@ -356,12 +357,9 @@ func main() {
 			defer file.Close()
 
 			serverStart.Stderr = file
-
 			err = serverStart.Run()
 			if err != nil {
 				log.Println(err)
-				b.Edit(c.Message, "Stop", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
 			} else {
 				b.Edit(c.Message, "Start", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
@@ -375,7 +373,7 @@ func main() {
 	b.Start()
 }
 
-func FindID() string {
+func PID() string {
 	serverID := exec.Command("lsof", "-t", "-i:3000")
 	sOut, sErr := serverID.CombinedOutput()
 	if sErr != nil {
@@ -390,23 +388,25 @@ func FindID() string {
 	return ID
 }
 
-func CS() string {
+// func PID() string {
 
-	checkStatus := exec.Command("lsof", "-t", "-i:3000")
-	sOut, sErr := checkStatus.CombinedOutput()
-	if sErr != nil {
-		log.Println(sErr)
-	}
-	err := checkStatus.Run()
-	if err != nil {
-		log.Println(err)
-	}
+// 	checkStatus := exec.Command("lsof", "-t", "-i:3000")
+// 	sOut, sErr := checkStatus.CombinedOutput()
+// 	if sErr != nil {
+// 		log.Println(sErr)
+// 	}
+// 	err := checkStatus.Run()
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	ID := string(sOut)
-	return ID
-}
+// 	ID := string(sOut)
+// 	ID = strings.Replace(ID, "\n", "", -1)
+// 	return ID
+// }
 
 func KillServer(ID string) bool {
+
 	serverkillcmd := exec.Command("kill", "-9", ID)
 	err := serverkillcmd.Run()
 	if err != nil {
