@@ -408,10 +408,6 @@ func CS() string {
 
 func KillServer(ID string) bool {
 	serverkillcmd := exec.Command("kill", "-9", ID)
-	_, sErr := serverkillcmd.CombinedOutput()
-	if sErr != nil {
-		log.Println(sErr)
-	}
 	err := serverkillcmd.Run()
 	if err != nil {
 		log.Println(err)
