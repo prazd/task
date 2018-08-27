@@ -112,20 +112,27 @@ func main() {
 	}
 
 	serverInline := [][]tb.InlineButton{
-		[]tb.InlineButton{ServerStart, ServerStop, ServerLog, BackToServices, BackToMain},
-	}
-
-	mongoInline := [][]tb.InlineButton{
-		[]tb.InlineButton{MongoStart, MongoStop, MongoReboot, BackToServices},
+		[]tb.InlineButton{ServerStart, ServerStop},
+		[]tb.InlineButton{ServerLog},
+		[]tb.InlineButton{BackToServices},
 		[]tb.InlineButton{BackToMain},
 	}
 
+	mongoInline := [][]tb.InlineButton{
+		[]tb.InlineButton{MongoStart, MongoStop, MongoReboot},
+		[]tb.InlineButton{BackToServices},
+	}
+
 	mainInline := [][]tb.InlineButton{
-		[]tb.InlineButton{volQ, invQ, volStatus, invStatus, Services},
+		[]tb.InlineButton{volQ, invQ, volStatus, invStatus},
+		[]tb.InlineButton{Services},
 	}
 
 	servicesInline := [][]tb.InlineButton{
-		[]tb.InlineButton{MongoServices, GoServer, ServicesStatus, BotLog, BackToMain},
+		[]tb.InlineButton{MongoServices, GoServer, ServicesStatus},
+		[]tb.InlineButton{BotLog},
+		[]tb.InlineButton{Services},
+		[]tb.InlineButton{BackToMain},
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
