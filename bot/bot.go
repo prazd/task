@@ -136,318 +136,322 @@ func main() {
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
-		b.Send(m.Sender, "Привет!Я помогу в мониторинге", &tb.ReplyMarkup{
-			InlineKeyboard: mainInline,
-		})
-		b.Handle(&volQ, func(c *tb.Callback) {
-			resp := mongo.QV()
-			b.Edit(c.Message, "ℹ Vquantity: "+strconv.Itoa(resp), &tb.ReplyMarkup{
+		whitelist := [1]int{316152758}
+		if m.Sender.ID != whitelist[0] {
+			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
+		} else {
+			b.Send(m.Sender, "Привет!Я помогу в мониторинге", &tb.ReplyMarkup{
 				InlineKeyboard: mainInline,
 			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&invQ, func(c *tb.Callback) {
-			resp := mongo.QI()
-			b.Edit(c.Message, "ℹ Iquantity: "+strconv.Itoa(resp), &tb.ReplyMarkup{
-				InlineKeyboard: mainInline,
+			b.Handle(&volQ, func(c *tb.Callback) {
+				resp := mongo.QV()
+				b.Edit(c.Message, "ℹ Vquantity: "+strconv.Itoa(resp), &tb.ReplyMarkup{
+					InlineKeyboard: mainInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
 			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
 
-		b.Handle(&volStatus, func(c *tb.Callback) {
-			arr := mongo.SV()
-			var resp string
-			for i, _ := range arr {
-				if i == 0 {
-					resp = "Готовы помочь:\n    🚹                   📱               👍     👎\n"
-				}
-				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "; Reviews    " + arr[i][2] + "        " + arr[i][3] + "\n"
-			}
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mainInline,
+			b.Handle(&invQ, func(c *tb.Callback) {
+				resp := mongo.QI()
+				b.Edit(c.Message, "ℹ Iquantity: "+strconv.Itoa(resp), &tb.ReplyMarkup{
+					InlineKeyboard: mainInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
 			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
 
-		b.Handle(&invStatus, func(c *tb.Callback) {
-			arr := mongo.SI()
-			var resp string
-			for i, _ := range arr {
-				if i == 0 {
-					resp = "Нужна помощь:\n       🆔                  🚹\n"
-				}
-				resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "\n"
-			}
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mainInline,
-			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&ServicesStatus, func(c *tb.Callback) {
-			ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
-			mongoPort := ps.IsOpen(27017)
-			serverPort := ps.IsOpen(3000)
-			var mongoS, serverS string
-			if mongoPort == true {
-				mongoS = "✔"
-			} else {
-				mongoS = "✖"
-			}
-
-			if serverPort == true {
-				serverS = "✔"
-			} else {
-				serverS = "✖"
-			}
-			resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline,
-			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-		b.Handle(&BotLog, func(c *tb.Callback) {
-			logfile, err := ioutil.ReadFile("bot.log")
-			if err != nil {
-				log.Println(err)
-			}
-			resp := string(logfile)
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline,
-			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&ServerLog, func(c *tb.Callback) {
-			logfile, err := ioutil.ReadFile("main.log")
-			if err != nil {
-				log.Println(err)
-			}
-			resp := string(logfile)
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline,
-			})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&Services, func(c *tb.Callback) {
-			b.Edit(c.Message, "Services monitoring", &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		// Back Handle
-
-		b.Handle(&BackToMain, func(c *tb.Callback) {
-			b.Edit(c.Message, "Monitoring info in mongodb", &tb.ReplyMarkup{
-				InlineKeyboard: mainInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&BackToServices, func(c *tb.Callback) {
-			b.Edit(c.Message, "Services", &tb.ReplyMarkup{
-				InlineKeyboard: servicesInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		// Services
-		// Mongo
-
-		b.Handle(&MongoServices, func(c *tb.Callback) {
-			b.Edit(c.Message, "Mongo", &tb.ReplyMarkup{
-				InlineKeyboard: mongoInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&MongoStop, func(c *tb.Callback) {
-			mongocmd := exec.Command("systemctl", "stop", "mongodb")
-			err := mongocmd.Run()
-			resp := "Mongo: Not stopped ✔"
-			if err != nil {
-				log.Println(err)
-			} else {
-				resp = "Mongo: Stopped ✖"
-			}
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mongoInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&MongoStart, func(c *tb.Callback) {
-			mongocmd := exec.Command("systemctl", "start", "mongodb")
-			err := mongocmd.Run()
-			resp := "Mongo: Not Start ✖"
-			if err != nil {
-				log.Println(err)
-			} else {
-				resp = "Mongo: Start ✔"
-			}
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mongoInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&MongoReboot, func(c *tb.Callback) {
-			mongocmd := exec.Command("systemctl", "restart", "mongodb")
-			err := mongocmd.Run()
-			resp := "Mongo: not reboot ✖"
-			if err != nil {
-				log.Println(err)
-			} else {
-				resp = "Mongo: reboot ✔"
-			}
-
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: mongoInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		//Server
-
-		b.Handle(&GoServer, func(c *tb.Callback) {
-			b.Edit(c.Message, "Server", &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-			b.Respond(c, &tb.CallbackResponse{})
-		})
-
-		b.Handle(&ServerStop, func(c *tb.Callback) {
-
-			b.Edit(c.Message, "find the process id...", &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-			info := make(chan string)
-
-			go func() {
-				serverID := exec.Command("lsof", "-t", "-i:3000")
-				sOut, sErr := serverID.CombinedOutput()
-				if sErr != nil {
-					log.Println(sErr)
-				}
-				ID := string(sOut)
-				ID = strings.Replace(ID, "\n", "", -1)
-
-				info <- ID
-
-			}()
-
-			ID := <-info
-			// Stop Server
-
-			b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-
-			go func() {
-				serverkillcmd := exec.Command("kill", "-9", ID)
-				var out bytes.Buffer
-				var stderr bytes.Buffer
-				serverkillcmd.Stdout = &out
-				serverkillcmd.Stderr = &stderr
-				err := serverkillcmd.Run()
-				if err != nil {
-					log.Println(err, stderr.String())
-					info <- "bad"
-				}
-				info <- "nice"
-			}()
-
-			kill := <-info
-
-			if kill == "bad" {
-				b.Edit(c.Message, "Not killed", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
-			} else {
-				b.Edit(c.Message, "Killed", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
-			}
-
-			b.Edit(c.Message, "Check status of process....", &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-
-			// Check status of process
-			go func() {
-				serverID := exec.Command("lsof", "-t", "-i:3000")
-
-				var stderr bytes.Buffer
-				var stdout bytes.Buffer
-
-				serverID.Stderr = &stderr
-				serverID.Stdout = &stdout
-				err := serverID.Run()
-				if err != nil {
-					log.Println(stderr.String(), err)
+			b.Handle(&volStatus, func(c *tb.Callback) {
+				arr := mongo.SV()
+				var resp string
+				for i, _ := range arr {
+					if i == 0 {
+						resp = "Готовы помочь:\n    🚹                   📱               👍     👎\n"
+					}
+					resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "; Reviews    " + arr[i][2] + "        " + arr[i][3] + "\n"
 				}
 
-				ID := stdout.String()
-				ID = strings.Replace(ID, "\n", "", -1)
-				info <- ID
-			}()
-			ID = <-info
-			var resp string
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: mainInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
-			if len(ID) == 0 {
-				resp = "Server stopped"
-			} else {
-				resp = "Server didn't stop"
-			}
+			b.Handle(&invStatus, func(c *tb.Callback) {
+				arr := mongo.SI()
+				var resp string
+				for i, _ := range arr {
+					if i == 0 {
+						resp = "Нужна помощь:\n       🆔                  🚹\n"
+					}
+					resp += strconv.Itoa(i+1) + "." + arr[i][0] + " : " + arr[i][1] + "\n"
+				}
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: mainInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-			b.Respond(c, &tb.CallbackResponse{})
+			b.Handle(&ServicesStatus, func(c *tb.Callback) {
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				mongoPort := ps.IsOpen(27017)
+				serverPort := ps.IsOpen(3000)
+				var mongoS, serverS string
+				if mongoPort == true {
+					mongoS = "✔"
+				} else {
+					mongoS = "✖"
+				}
 
-		})
+				if serverPort == true {
+					serverS = "✔"
+				} else {
+					serverS = "✖"
+				}
+				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
 
-		b.Handle(&ServerStart, func(c *tb.Callback) {
-			info := make(chan string)
-			go func() {
-				serverStart := exec.Command("./StartServer.sh")
-				err := serverStart.Run()
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+			b.Handle(&BotLog, func(c *tb.Callback) {
+				logfile, err := ioutil.ReadFile("bot.log")
 				if err != nil {
 					log.Println(err)
-					info <- "Fail"
 				}
-				info <- "Starting..."
-			}()
+				resp := string(logfile)
 
-			b.Edit(c.Message, <-info, &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
-			go func() {
-				serverID := exec.Command("lsof", "-t", "-i:3000")
-
-				var stderr bytes.Buffer
-				var stdout bytes.Buffer
-
-				serverID.Stderr = &stderr
-				serverID.Stdout = &stdout
-				err := serverID.Run()
+			b.Handle(&ServerLog, func(c *tb.Callback) {
+				logfile, err := ioutil.ReadFile("main.log")
 				if err != nil {
-					log.Println(stderr.String(), err)
+					log.Println(err)
+				}
+				resp := string(logfile)
+
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline,
+				})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&Services, func(c *tb.Callback) {
+				b.Edit(c.Message, "Services monitoring", &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			// Back Handle
+
+			b.Handle(&BackToMain, func(c *tb.Callback) {
+				b.Edit(c.Message, "Monitoring info in mongodb", &tb.ReplyMarkup{
+					InlineKeyboard: mainInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&BackToServices, func(c *tb.Callback) {
+				b.Edit(c.Message, "Services", &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			// Services
+			// Mongo
+
+			b.Handle(&MongoServices, func(c *tb.Callback) {
+				b.Edit(c.Message, "Mongo", &tb.ReplyMarkup{
+					InlineKeyboard: mongoInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&MongoStop, func(c *tb.Callback) {
+				mongocmd := exec.Command("systemctl", "stop", "mongodb")
+				err := mongocmd.Run()
+				resp := "Mongo: Not stopped ✔"
+				if err != nil {
+					log.Println(err)
+				} else {
+					resp = "Mongo: Stopped ✖"
 				}
 
-				ID := stdout.String()
-				ID = strings.Replace(ID, "\n", "", -1)
-				info <- ID
-			}()
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: mongoInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
-			var resp string
-			if len(<-info) != 0 {
-				resp = "Nice"
-			} else {
-				resp = "Fail"
-			}
+			b.Handle(&MongoStart, func(c *tb.Callback) {
+				mongocmd := exec.Command("systemctl", "start", "mongodb")
+				err := mongocmd.Run()
+				resp := "Mongo: Not Start ✖"
+				if err != nil {
+					log.Println(err)
+				} else {
+					resp = "Mongo: Start ✔"
+				}
 
-			b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				InlineKeyboard: serverInline})
-			b.Respond(c, &tb.CallbackResponse{})
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: mongoInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
-		})
+			b.Handle(&MongoReboot, func(c *tb.Callback) {
+				mongocmd := exec.Command("systemctl", "restart", "mongodb")
+				err := mongocmd.Run()
+				resp := "Mongo: not reboot ✖"
+				if err != nil {
+					log.Println(err)
+				} else {
+					resp = "Mongo: reboot ✔"
+				}
 
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: mongoInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			//Server
+
+			b.Handle(&GoServer, func(c *tb.Callback) {
+				b.Edit(c.Message, "Server", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&ServerStop, func(c *tb.Callback) {
+
+				b.Edit(c.Message, "find the process id...", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+				info := make(chan string)
+
+				go func() {
+					serverID := exec.Command("lsof", "-t", "-i:3000")
+					sOut, sErr := serverID.CombinedOutput()
+					if sErr != nil {
+						log.Println(sErr)
+					}
+					ID := string(sOut)
+					ID = strings.Replace(ID, "\n", "", -1)
+
+					info <- ID
+
+				}()
+
+				ID := <-info
+				// Stop Server
+
+				b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+
+				go func() {
+					serverkillcmd := exec.Command("kill", "-9", ID)
+					var out bytes.Buffer
+					var stderr bytes.Buffer
+					serverkillcmd.Stdout = &out
+					serverkillcmd.Stderr = &stderr
+					err := serverkillcmd.Run()
+					if err != nil {
+						log.Println(err, stderr.String())
+						info <- "bad"
+					}
+					info <- "nice"
+				}()
+
+				kill := <-info
+
+				if kill == "bad" {
+					b.Edit(c.Message, "Not killed", &tb.ReplyMarkup{
+						InlineKeyboard: serverInline})
+				} else {
+					b.Edit(c.Message, "Killed", &tb.ReplyMarkup{
+						InlineKeyboard: serverInline})
+				}
+
+				b.Edit(c.Message, "Check status of process....", &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+
+				// Check status of process
+				go func() {
+					serverID := exec.Command("lsof", "-t", "-i:3000")
+
+					var stderr bytes.Buffer
+					var stdout bytes.Buffer
+
+					serverID.Stderr = &stderr
+					serverID.Stdout = &stdout
+					err := serverID.Run()
+					if err != nil {
+						log.Println(stderr.String(), err)
+					}
+
+					ID := stdout.String()
+					ID = strings.Replace(ID, "\n", "", -1)
+					info <- ID
+				}()
+				ID = <-info
+				var resp string
+
+				if len(ID) == 0 {
+					resp = "Server stopped"
+				} else {
+					resp = "Server didn't stop"
+				}
+
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+				b.Respond(c, &tb.CallbackResponse{})
+
+			})
+
+			b.Handle(&ServerStart, func(c *tb.Callback) {
+				info := make(chan string)
+				go func() {
+					serverStart := exec.Command("./StartServer.sh")
+					err := serverStart.Run()
+					if err != nil {
+						log.Println(err)
+						info <- "Fail"
+					}
+					info <- "Starting..."
+				}()
+
+				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+
+				go func() {
+					serverID := exec.Command("lsof", "-t", "-i:3000")
+
+					var stderr bytes.Buffer
+					var stdout bytes.Buffer
+
+					serverID.Stderr = &stderr
+					serverID.Stdout = &stdout
+					err := serverID.Run()
+					if err != nil {
+						log.Println(stderr.String(), err)
+					}
+
+					ID := stdout.String()
+					ID = strings.Replace(ID, "\n", "", -1)
+					info <- ID
+				}()
+
+				var resp string
+				if len(<-info) != 0 {
+					resp = "Nice"
+				} else {
+					resp = "Fail"
+				}
+
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: serverInline})
+				b.Respond(c, &tb.CallbackResponse{})
+
+			})
+		}
 	})
 
 	b.Start()
