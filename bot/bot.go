@@ -350,7 +350,7 @@ func main() {
 				serverkillcmd.Stderr = &stderr
 				err := serverkillcmd.Run()
 				if err != nil {
-					log.Println(err, stderr)
+					log.Println(err, stderr.String())
 					info <- "bad"
 				}
 				info <- "nice"
