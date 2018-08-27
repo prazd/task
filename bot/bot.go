@@ -372,7 +372,7 @@ func main() {
 				serverID.Stdout = &stdout
 				err := serverID.Run()
 				if err != nil {
-					log.Println(stderr, err)
+					log.Println(stderr.String(), err)
 				}
 
 				ID := stdout.String()
@@ -419,7 +419,7 @@ func main() {
 				serverID.Stdout = &stdout
 				err := serverID.Run()
 				if err != nil {
-					log.Println(stderr, err)
+					log.Println(stderr.String(), err)
 				}
 
 				ID := stdout.String()
