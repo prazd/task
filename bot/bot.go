@@ -389,10 +389,28 @@ func main() {
 					log.Println(err)
 					info <- "Not start"
 				}
-				info <- "Start"
+				info <- "Starting..."
 			}()
 
-			b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+			go func() {
+				serverID := exec.Command("lsof", "-t", "-i:3000")
+				sOut, sErr := serverID.CombinedOutput()
+				if sErr != nil {
+					log.Println(sErr)
+				}
+				ID := string(sOut)
+				ID = strings.Replace(ID, "\n", "", -1)
+				info <- ID
+			}()
+
+			var resp string
+			if len(<-info) == 0 {
+				resp = "Start"
+			} else {
+				resp = "Not start"
+			}
+
+			b.Edit(c.Message, resp, &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 			b.Respond(c, &tb.CallbackResponse{})
 
