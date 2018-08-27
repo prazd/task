@@ -121,6 +121,7 @@ func main() {
 	mongoInline := [][]tb.InlineButton{
 		[]tb.InlineButton{MongoStart, MongoStop, MongoReboot},
 		[]tb.InlineButton{BackToServices},
+		[]tb.InlineButton{BackToMain},
 	}
 
 	mainInline := [][]tb.InlineButton{
@@ -131,7 +132,6 @@ func main() {
 	servicesInline := [][]tb.InlineButton{
 		[]tb.InlineButton{MongoServices, GoServer, ServicesStatus},
 		[]tb.InlineButton{BotLog},
-		[]tb.InlineButton{Services},
 		[]tb.InlineButton{BackToMain},
 	}
 
