@@ -312,16 +312,37 @@ func main() {
 
 			b.Edit(c.Message, "Find ID of process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
-			// Find id of processs
-			ID := PID()
+			check := make(chan string)
+			go func() {
+				serverID := exec.Command("lsof", "-t", "-i:3000")
+				sOut, sErr := serverID.CombinedOutput()
+				if sErr != nil {
+					log.Println(sErr)
+				}
+				ID := string(sOut)
+				ID = strings.Replace(ID, "\n", "", -1)
+				// return ID
+				check <- ID
+			}()
 
+			ID := <-check
 			// Stop Server
 			b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 
-			kill := KillServer(ID)
+			go func() {
+				serverkillcmd := exec.Command("kill", "-9", ID)
+				err := serverkillcmd.Run()
+				if err != nil {
+					log.Println(err)
+					check <- "bad"
+				}
+				check <- "nice"
+			}()
 
-			if kill == false {
+			kill := <-check
+
+			if kill == "bad" {
 				b.Edit(c.Message, "Not Kill", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			} else {
@@ -333,7 +354,18 @@ func main() {
 				InlineKeyboard: serverInline})
 
 			// Check status of process
-			ID = PID()
+
+			go func() {
+				serverID := exec.Command("lsof", "-t", "-i:3000")
+				sOut, sErr := serverID.CombinedOutput()
+				if sErr != nil {
+					log.Println(sErr)
+				}
+				ID := string(sOut)
+				ID = strings.Replace(ID, "\n", "", -1)
+				check <- ID
+			}()
+			ID = <-check
 			var resp string
 
 			if len(ID) == 0 {
@@ -349,11 +381,6 @@ func main() {
 		})
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
-			// serverStart := exec.Command("./Server.sh")
-			// serverStart.Run()
-			// b.Edit(c.Message, "Start", &tb.ReplyMarkup{
-			// 	InlineKeyboard: serverInline})
-			// b.Respond(c, &tb.CallbackResponse{})
 			go func() {
 				serverStart := exec.Command("./Server.sh")
 				err := serverStart.Run()
@@ -369,27 +396,4 @@ func main() {
 	})
 
 	b.Start()
-}
-
-func PID() string {
-
-	serverID := exec.Command("lsof", "-t", "-i:3000")
-	sOut, sErr := serverID.CombinedOutput()
-	if sErr != nil {
-		log.Println(sErr)
-	}
-	ID := string(sOut)
-	ID = strings.Replace(ID, "\n", "", -1)
-	return ID
-}
-
-func KillServer(ID string) bool {
-	serverkillcmd := exec.Command("kill", "-9", ID)
-	err := serverkillcmd.Run()
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	return true
-
 }
