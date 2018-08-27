@@ -398,13 +398,23 @@ func main() {
 				info <- "Starting..."
 			}()
 
+			b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
+
 			go func() {
 				serverID := exec.Command("lsof", "-t", "-i:3000")
-				sOut, sErr := serverID.CombinedOutput()
-				if sErr != nil {
-					log.Println(sErr)
+
+				var stderr bytes.Buffer
+				var stdout bytes.Buffer
+
+				serverID.Stderr = &stderr
+				serverID.Stdout = &stdout
+				err := serverID.Run()
+				if err != nil {
+					log.Println(stderr)
 				}
-				ID := string(sOut)
+
+				ID := stdout.String()
 				ID = strings.Replace(ID, "\n", "", -1)
 				info <- ID
 			}()
