@@ -136,7 +136,7 @@ func main() {
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
-		whitelist := [1]int{1} // id's
+		whitelist := [1]int{} // id's
 		if m.Sender.ID != whitelist[0] {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		} else {
