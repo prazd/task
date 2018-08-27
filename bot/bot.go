@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"log"
 	"os"
@@ -310,9 +311,10 @@ func main() {
 
 		b.Handle(&ServerStop, func(c *tb.Callback) {
 
-			b.Edit(c.Message, "Find ID of process...", &tb.ReplyMarkup{
+			b.Edit(c.Message, "find the process id...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 			info := make(chan string)
+
 			go func() {
 				serverID := exec.Command("lsof", "-t", "-i:3000")
 				sOut, sErr := serverID.CombinedOutput()
@@ -323,18 +325,23 @@ func main() {
 				ID = strings.Replace(ID, "\n", "", -1)
 
 				info <- ID
+
 			}()
 
 			ID := <-info
 			// Stop Server
-			b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
+			b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 
 			go func() {
 				serverkillcmd := exec.Command("kill", "-9", ID)
+				var out bytes.Buffer
+				var stderr bytes.Buffer
+				serverkillcmd.Stdout = &out
+				serverkillcmd.Stderr = &stderr
 				err := serverkillcmd.Run()
 				if err != nil {
-					log.Println(err)
+					log.Println(stderr.String())
 					info <- "bad"
 				}
 				info <- "nice"
@@ -343,18 +350,17 @@ func main() {
 			kill := <-info
 
 			if kill == "bad" {
-				b.Edit(c.Message, "Not Kill", &tb.ReplyMarkup{
+				b.Edit(c.Message, "Not killed", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			} else {
-				b.Edit(c.Message, "shut down", &tb.ReplyMarkup{
+				b.Edit(c.Message, "Killed", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 			}
 
-			b.Edit(c.Message, "info Status", &tb.ReplyMarkup{
+			b.Edit(c.Message, "Check status of process....", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 
 			// Check status of process
-
 			go func() {
 				serverID := exec.Command("lsof", "-t", "-i:3000")
 				sOut, sErr := serverID.CombinedOutput()
@@ -369,9 +375,9 @@ func main() {
 			var resp string
 
 			if len(ID) == 0 {
-				resp = "Server has stopped"
+				resp = "Server stopped"
 			} else {
-				resp = "Server hasn't stopped"
+				resp = "Server didn't stop"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -387,7 +393,7 @@ func main() {
 				err := serverStart.Run()
 				if err != nil {
 					log.Println(err)
-					info <- "Not start"
+					info <- "Fail"
 				}
 				info <- "Starting..."
 			}()
@@ -404,10 +410,10 @@ func main() {
 			}()
 
 			var resp string
-			if len(<-info) == 0 {
-				resp = "Start"
+			if len(<-info) != 0 {
+				resp = "Nice"
 			} else {
-				resp = "Not start"
+				resp = "Fail"
 			}
 
 			b.Edit(c.Message, resp, &tb.ReplyMarkup{
