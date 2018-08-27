@@ -330,6 +330,7 @@ func main() {
 
 			ID := <-info
 			// Stop Server
+
 			b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 
@@ -341,7 +342,7 @@ func main() {
 				serverkillcmd.Stderr = &stderr
 				err := serverkillcmd.Run()
 				if err != nil {
-					log.Println(stderr.String())
+					log.Println(err, stderr)
 					info <- "bad"
 				}
 				info <- "nice"
@@ -363,11 +364,18 @@ func main() {
 			// Check status of process
 			go func() {
 				serverID := exec.Command("lsof", "-t", "-i:3000")
-				sOut, sErr := serverID.CombinedOutput()
-				if sErr != nil {
-					log.Println(sErr)
+
+				var stderr bytes.Buffer
+				var stdout bytes.Buffer
+
+				serverID.Stderr = &stderr
+				serverID.Stdout = &stdout
+				err := serverID.Run()
+				if err != nil {
+					log.Println(stderr, err)
 				}
-				ID := string(sOut)
+
+				ID := stdout.String()
 				ID = strings.Replace(ID, "\n", "", -1)
 				info <- ID
 			}()
@@ -411,7 +419,7 @@ func main() {
 				serverID.Stdout = &stdout
 				err := serverID.Run()
 				if err != nil {
-					log.Println(stderr)
+					log.Println(stderr, err)
 				}
 
 				ID := stdout.String()
