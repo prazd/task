@@ -383,15 +383,8 @@ func main() {
 		b.Handle(&ServerStart, func(c *tb.Callback) {
 			info := make(chan string)
 			go func() {
-				serverStart := exec.Command("./main")
-				file, err := os.Create("./main.log")
-				if err != nil {
-					log.Println(err)
-				}
-				defer file.Close()
-				serverStart.Stderr = file
-
-				err = serverStart.Run()
+				serverStart := exec.Command("./Server.sh")
+				err := serverStart.Run()
 				if err != nil {
 					log.Println(err)
 					info <- "Not start"
