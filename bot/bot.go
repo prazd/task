@@ -136,8 +136,8 @@ func main() {
 	}
 
 	b.Handle("/start", func(m *tb.Message) {
-		whitelist := [1]int{} // id's
-		if m.Sender.ID != whitelist[0] {
+		whitelist := [2]string{os.Getenv("DevOne"), os.Getenv("DevTwo")} // id's
+		if strconv.Itoa(m.Sender.ID) != whitelist[0] || strconv.Itoa(m.Sender.ID) != whitelist[1] {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		} else {
 			b.Send(m.Sender, "Привет!Я помогу в мониторинге", &tb.ReplyMarkup{
