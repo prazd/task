@@ -312,7 +312,7 @@ func main() {
 
 			b.Edit(c.Message, "Find ID of process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
-			check := make(chan string)
+			info := make(chan string)
 			go func() {
 				serverID := exec.Command("lsof", "-t", "-i:3000")
 				sOut, sErr := serverID.CombinedOutput()
@@ -321,11 +321,11 @@ func main() {
 				}
 				ID := string(sOut)
 				ID = strings.Replace(ID, "\n", "", -1)
-				// return ID
-				check <- ID
+
+				info <- ID
 			}()
 
-			ID := <-check
+			ID := <-info
 			// Stop Server
 			b.Edit(c.Message, "Kill Server process...", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
@@ -335,12 +335,12 @@ func main() {
 				err := serverkillcmd.Run()
 				if err != nil {
 					log.Println(err)
-					check <- "bad"
+					info <- "bad"
 				}
-				check <- "nice"
+				info <- "nice"
 			}()
 
-			kill := <-check
+			kill := <-info
 
 			if kill == "bad" {
 				b.Edit(c.Message, "Not Kill", &tb.ReplyMarkup{
@@ -350,7 +350,7 @@ func main() {
 					InlineKeyboard: serverInline})
 			}
 
-			b.Edit(c.Message, "Check Status", &tb.ReplyMarkup{
+			b.Edit(c.Message, "info Status", &tb.ReplyMarkup{
 				InlineKeyboard: serverInline})
 
 			// Check status of process
@@ -363,9 +363,9 @@ func main() {
 				}
 				ID := string(sOut)
 				ID = strings.Replace(ID, "\n", "", -1)
-				check <- ID
+				info <- ID
 			}()
-			ID = <-check
+			ID = <-info
 			var resp string
 
 			if len(ID) == 0 {
@@ -381,16 +381,28 @@ func main() {
 		})
 
 		b.Handle(&ServerStart, func(c *tb.Callback) {
+			info := make(chan string)
 			go func() {
-				serverStart := exec.Command("./Server.sh")
-				err := serverStart.Run()
+				serverStart := exec.Command("./main")
+				file, err := os.Create("./main.log")
 				if err != nil {
 					log.Println(err)
 				}
-				b.Edit(c.Message, "Start", &tb.ReplyMarkup{
-					InlineKeyboard: serverInline})
-				b.Respond(c, &tb.CallbackResponse{})
+				defer file.Close()
+				serverStart.Stderr = file
+
+				err = serverStart.Run()
+				if err != nil {
+					log.Println(err)
+					info <- "Not start"
+				}
+				info <- "Start"
 			}()
+
+			b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+				InlineKeyboard: serverInline})
+			b.Respond(c, &tb.CallbackResponse{})
+
 		})
 
 	})
