@@ -405,7 +405,7 @@ func main() {
 		b.Handle(&ServerStart, func(c *tb.Callback) {
 			info := make(chan string)
 			go func() {
-				serverStart := exec.Command("./Server.sh")
+				serverStart := exec.Command("./StartServer.sh")
 				err := serverStart.Run()
 				if err != nil {
 					log.Println(err)
