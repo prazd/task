@@ -144,9 +144,7 @@ func main() {
 		fmt.Println(whitelist[0] == strconv.Itoa(m.Sender.ID))
 		fmt.Println(whitelist[1] == strconv.Itoa(m.Sender.ID))
 
-		if strconv.Itoa(m.Sender.ID) != whitelist[0] || strconv.Itoa(m.Sender.ID) != whitelist[1] {
-			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
-		} else {
+		if strconv.Itoa(m.Sender.ID) == whitelist[0] || strconv.Itoa(m.Sender.ID) == whitelist[1] {
 			b.Send(m.Sender, "Привет!Я помогу в мониторинге", &tb.ReplyMarkup{
 				InlineKeyboard: mainInline,
 			})
@@ -458,6 +456,8 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 
 			})
+		} else {
+			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		}
 	})
 
