@@ -543,17 +543,18 @@ func main() {
 						log.Println(err)
 						info <- "bad"
 					}
-					if <-info == "bad" {
-						b.Edit(c.Message, "Active", &tb.ReplyMarkup{
-							InlineKeyboard: dockerInline})
-						b.Respond(c, &tb.CallbackResponse{})
-					} else {
-						b.Edit(c.Message, "Inactive", &tb.ReplyMarkup{
-							InlineKeyboard: dockerInline})
-						b.Respond(c, &tb.CallbackResponse{})
-					}
 				}()
+				if <-info == "bad" {
+					b.Edit(c.Message, "Active", &tb.ReplyMarkup{
+						InlineKeyboard: dockerInline})
+					b.Respond(c, &tb.CallbackResponse{})
+				} else {
+					b.Edit(c.Message, "Inactive", &tb.ReplyMarkup{
+						InlineKeyboard: dockerInline})
+					b.Respond(c, &tb.CallbackResponse{})
+				}
 			})
+
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		}
