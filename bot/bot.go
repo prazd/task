@@ -141,6 +141,9 @@ func main() {
 		fmt.Println(os.Getenv("DevOne"), os.Getenv("DevTwo"))
 		fmt.Println(whitelist)
 		fmt.Println(strconv.Itoa(m.Sender.ID))
+		fmt.Println(whitelist[0] == strconv.Itoa(m.Sender.ID))
+		fmt.Println(whitelist[1] == strconv.Itoa(m.Sender.ID))
+
 		if strconv.Itoa(m.Sender.ID) != whitelist[0] || strconv.Itoa(m.Sender.ID) != whitelist[1] {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		} else {
