@@ -96,6 +96,7 @@ func main() {
 	}
 
 	// Server
+
 	GoServer := tb.InlineButton{
 		Unique: "GS",
 		Text:   "Server",
@@ -111,6 +112,7 @@ func main() {
 		Text:   "Stop",
 	}
 
+	// Docker
 	Docker := tb.InlineButton{
 		Unique: "Docker",
 		Text:   "Docker 🐳",
@@ -121,6 +123,22 @@ func main() {
 		Text:   "PS",
 	}
 
+	DockerStart := tb.InlineButton{
+		Unique: "DockerStart",
+		Text:   "Start",
+	}
+
+	DockerStop := tb.InlineButton{
+		Unique: "DockerStop",
+		Text:   "Stop",
+	}
+
+	DockerStatus := tb.InlineButton{
+		Unique: "DockerStatus",
+		Text:   "Status",
+	}
+
+	// Inline
 	serverInline := [][]tb.InlineButton{
 		[]tb.InlineButton{ServerStart, ServerStop},
 		[]tb.InlineButton{ServerLog},
@@ -135,7 +153,9 @@ func main() {
 	}
 
 	dockerInline := [][]tb.InlineButton{
+		[]tb.InlineButton{DockerStart, DockerStop},
 		[]tb.InlineButton{DockerPs},
+		[]tb.InlineButton{DockerStatus},
 		[]tb.InlineButton{BackToServices},
 		[]tb.InlineButton{BackToMain},
 	}
@@ -488,6 +508,51 @@ func main() {
 				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&DockerStatus, func(c *tb.Callback) {
+				info := make(chan string)
+				go func() {
+					ps := exec.Command("systemctl", "is-active", "docker")
+					var stdout bytes.Buffer
+					ps.Stdout = &stdout
+					err := ps.Run()
+					if err != nil {
+						log.Println(err)
+					}
+					info <- stdout.String()
+				}()
+				var resp string
+
+				if <-info == "active" {
+					resp = "Active"
+				} else {
+					resp = "Inactive"
+				}
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&DockerStop, func(c *tb.Callback) {
+				info := make(chan string)
+				go func() {
+					dockerstop := exec.Command("systemctl", "stop", "docker")
+					err := dockerstop.Run()
+					if err != nil {
+						log.Println(err)
+						info <- "bad"
+					}
+					if <-info == "bad" {
+						b.Edit(c.Message, "Active", &tb.ReplyMarkup{
+							InlineKeyboard: dockerInline})
+						b.Respond(c, &tb.CallbackResponse{})
+					} else {
+						b.Edit(c.Message, "Inactive", &tb.ReplyMarkup{
+							InlineKeyboard: dockerInline})
+						b.Respond(c, &tb.CallbackResponse{})
+					}
+				}()
 			})
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
