@@ -111,6 +111,16 @@ func main() {
 		Text:   "Stop",
 	}
 
+	Docker := tb.InlineButton{
+		Unique: "Docker",
+		Text:   "Docker 🐳",
+	}
+
+	DockerPs := tb.InlineButton{
+		Unique: "DockerPS",
+		Text:   "PS",
+	}
+
 	serverInline := [][]tb.InlineButton{
 		[]tb.InlineButton{ServerStart, ServerStop},
 		[]tb.InlineButton{ServerLog},
@@ -124,6 +134,12 @@ func main() {
 		[]tb.InlineButton{BackToMain},
 	}
 
+	dockerInline := [][]tb.InlineButton{
+		[]tb.InlineButton{DockerPs},
+		[]tb.InlineButton{BackToServices},
+		[]tb.InlineButton{BackToMain},
+	}
+
 	mainInline := [][]tb.InlineButton{
 		[]tb.InlineButton{volQ, invQ, volStatus, invStatus},
 		[]tb.InlineButton{Services},
@@ -131,6 +147,7 @@ func main() {
 
 	servicesInline := [][]tb.InlineButton{
 		[]tb.InlineButton{MongoServices, GoServer, ServicesStatus},
+		[]tb.InlineButton{Docker},
 		[]tb.InlineButton{BotLog},
 		[]tb.InlineButton{BackToMain},
 	}
@@ -448,6 +465,29 @@ func main() {
 					InlineKeyboard: serverInline})
 				b.Respond(c, &tb.CallbackResponse{})
 
+			})
+			// Docker
+			b.Handle(&Docker, func(c *tb.Callback) {
+				b.Edit(c.Message, "Docker", &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&DockerPs, func(c *tb.Callback) {
+				info := make(chan string)
+				go func() {
+					ps := exec.Command("docker", "ps")
+					var stdout bytes.Buffer
+					ps.Stdout = &stdout
+					err := ps.Run()
+					if err != nil {
+						log.Println(err)
+					}
+					info <- stdout.String()
+				}()
+				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
 			})
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
