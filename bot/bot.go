@@ -524,12 +524,7 @@ func main() {
 					b.Send(m.Sender, stdout.String())
 				}()
 				var resp string
-
-				if <-info == "active" {
-					resp = "Active"
-				} else {
-					resp = "Inactive"
-				}
+				resp = <-info
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
