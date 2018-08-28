@@ -521,6 +521,7 @@ func main() {
 						log.Println(err)
 					}
 					info <- stdout.String()
+					b.Send(m.Sender, stdout.String())
 				}()
 				var resp string
 
@@ -564,15 +565,16 @@ func main() {
 						info <- "bad"
 					}
 				}()
+				var resp string
 				if <-info != "bad" {
-					b.Edit(c.Message, "Active", &tb.ReplyMarkup{
-						InlineKeyboard: dockerInline})
-					b.Respond(c, &tb.CallbackResponse{})
+					resp = "Active"
 				} else {
-					b.Edit(c.Message, "Inactive", &tb.ReplyMarkup{
-						InlineKeyboard: dockerInline})
-					b.Respond(c, &tb.CallbackResponse{})
+					resp = "Inactive"
 				}
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
+
 			})
 
 		} else {
