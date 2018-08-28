@@ -521,7 +521,6 @@ func main() {
 						log.Println(err)
 					}
 					info <- stdout.String()
-					b.Send(m.Sender, stdout.String())
 				}()
 				var resp string
 				resp = <-info
@@ -537,19 +536,16 @@ func main() {
 					err := dockerstop.Run()
 					if err != nil {
 						log.Println(err)
-						info <- "bad"
+						info <- "Can't stop"
+					} else {
+						info <- "Nice"
 					}
 				}()
-				if <-info == "bad" {
-					b.Edit(c.Message, "Active", &tb.ReplyMarkup{
-						InlineKeyboard: dockerInline})
-					b.Respond(c, &tb.CallbackResponse{})
-				} else {
-					b.Edit(c.Message, "Inactive", &tb.ReplyMarkup{
-						InlineKeyboard: dockerInline})
-					b.Respond(c, &tb.CallbackResponse{})
-				}
+				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
 			})
+
 			b.Handle(&DockerStart, func(c *tb.Callback) {
 				info := make(chan string)
 				go func() {
@@ -557,19 +553,14 @@ func main() {
 					err := dockerstop.Run()
 					if err != nil {
 						log.Println(err)
-						info <- "bad"
+						info <- "Can't start"
+					} else {
+						info <- "Started"
 					}
 				}()
-				var resp string
-				if <-info != "bad" {
-					resp = "Active"
-				} else {
-					resp = "Inactive"
-				}
-				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
-
 			})
 
 		} else {
