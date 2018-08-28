@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -137,6 +138,9 @@ func main() {
 
 	b.Handle("/start", func(m *tb.Message) {
 		whitelist := [2]string{os.Getenv("DevOne"), os.Getenv("DevTwo")} // id's
+		fmt.Println(os.Getenv("DevOne"), os.Getenv("DevTwo"))
+		fmt.Println(whitelist)
+		fmt.Println(strconv.Itoa(m.Sender.ID))
 		if strconv.Itoa(m.Sender.ID) != whitelist[0] || strconv.Itoa(m.Sender.ID) != whitelist[1] {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		} else {
