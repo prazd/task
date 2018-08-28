@@ -10,7 +10,6 @@ RUN go get gopkg.in/mgo.v2/bson
 
 RUN go build -o main .
 
-
 EXPOSE 3000
 
 CMD ['/goapp/main']

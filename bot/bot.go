@@ -554,6 +554,26 @@ func main() {
 					b.Respond(c, &tb.CallbackResponse{})
 				}
 			})
+			b.Handle(&DockerStart, func(c *tb.Callback) {
+				info := make(chan string)
+				go func() {
+					dockerstop := exec.Command("systemctl", "start", "docker")
+					err := dockerstop.Run()
+					if err != nil {
+						log.Println(err)
+						info <- "bad"
+					}
+				}()
+				if <-info != "bad" {
+					b.Edit(c.Message, "Active", &tb.ReplyMarkup{
+						InlineKeyboard: dockerInline})
+					b.Respond(c, &tb.CallbackResponse{})
+				} else {
+					b.Edit(c.Message, "Inactive", &tb.ReplyMarkup{
+						InlineKeyboard: dockerInline})
+					b.Respond(c, &tb.CallbackResponse{})
+				}
+			})
 
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
