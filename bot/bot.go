@@ -138,6 +138,16 @@ func main() {
 		Text:   "Status",
 	}
 
+	DockerAlert := tb.InlineButton{
+		Unique: "DA",
+		Text:   "OK",
+	}
+
+	DockerCompose := tb.InlineButton{
+		Unique: "DC",
+		Text:   "docker-compose",
+	}
+
 	// Inline
 	serverInline := [][]tb.InlineButton{
 		[]tb.InlineButton{ServerStart, ServerStop},
@@ -152,10 +162,15 @@ func main() {
 		[]tb.InlineButton{BackToMain},
 	}
 
+	dockerAlert := [][]tb.InlineButton{
+		[]tb.InlineButton{DockerAlert, BackToServices},
+		[]tb.InlineButton{BackToMain},
+	}
+
 	dockerInline := [][]tb.InlineButton{
-		[]tb.InlineButton{DockerStart, DockerStop},
-		[]tb.InlineButton{DockerPs},
 		[]tb.InlineButton{DockerStatus},
+		[]tb.InlineButton{DockerStart, DockerStop, DockerPs},
+		[]tb.InlineButton{DockerCompose},
 		[]tb.InlineButton{BackToServices},
 		[]tb.InlineButton{BackToMain},
 	}
@@ -166,8 +181,8 @@ func main() {
 	}
 
 	servicesInline := [][]tb.InlineButton{
-		[]tb.InlineButton{MongoServices, GoServer, ServicesStatus},
-		[]tb.InlineButton{Docker},
+		[]tb.InlineButton{ServicesStatus},
+		[]tb.InlineButton{MongoServices, GoServer, Docker},
 		[]tb.InlineButton{BotLog},
 		[]tb.InlineButton{BackToMain},
 	}
@@ -298,12 +313,21 @@ func main() {
 			// Mongo
 
 			b.Handle(&MongoServices, func(c *tb.Callback) {
-				b.Edit(c.Message, "Mongo", &tb.ReplyMarkup{
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				mongoPort := ps.IsOpen(27017)
+				var info string
+				if mongoPort == false {
+					info = "Mongo: ✖"
+				} else {
+					info = "Mongo: ✔"
+				}
+				b.Edit(c.Message, info, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
 			b.Handle(&MongoStop, func(c *tb.Callback) {
+
 				mongocmd := exec.Command("systemctl", "stop", "mongodb")
 				err := mongocmd.Run()
 				resp := "Mongo: Not stopped ✔"
@@ -351,7 +375,16 @@ func main() {
 			//Server
 
 			b.Handle(&GoServer, func(c *tb.Callback) {
-				b.Edit(c.Message, "Server", &tb.ReplyMarkup{
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(3000)
+				var info string
+				if serverPort == false {
+					info = "Server: ✖"
+				} else {
+					info = "Server: ✔"
+				}
+
+				b.Edit(c.Message, info, &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
@@ -486,8 +519,16 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 
 			})
+
 			// Docker
+
 			b.Handle(&Docker, func(c *tb.Callback) {
+				b.Edit(c.Message, "Перед запуском контейнеров, убедитесь, что сервисы выключены", &tb.ReplyMarkup{
+					InlineKeyboard: dockerAlert})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&DockerAlert, func(c *tb.Callback) {
 				b.Edit(c.Message, "Docker", &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
@@ -559,6 +600,12 @@ func main() {
 					}
 				}()
 				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&DockerCompose, func(c *tb.Callback) {
+				b.Edit(c.Message, "Coming soon...", &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
