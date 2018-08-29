@@ -605,6 +605,49 @@ func main() {
 			})
 
 			b.Handle(&DockerCompose, func(c *tb.Callback) {
+				// status := make(chan string)
+				// go func() { // docker-compose build
+				// 	build := exec.Command("docker-compose", "build")
+				// 	err := build.Run()
+				// 	if err != nil {
+				// 		log.Println(err)
+				// 		status <- "bad"
+				// 	} else {
+				// 		status <- "nice"
+				// 	}
+				// }()
+
+				// up := <-status
+				// var resp string
+
+				// up = <-status
+				// if up == "bad" {
+				// 	resp = "Not build"
+				// } else {
+				// 	resp = "Build"
+				// }
+
+				// b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				// 	InlineKeyboard: dockerInline})
+				// b.Respond(c, &tb.CallbackResponse{})
+
+				// go func() { // docker-compose up
+				// 	up := exec.Command("docker-compose", "up")
+				// 	err := up.Run()
+				// 	if err != nil {
+				// 		log.Println(err)
+				// 		status <- "bad"
+				// 	} else {
+				// 		status <- "nice"
+				// 	}
+				// }()
+
+				// if up == "bad" {
+				// 	resp = "Not Up"
+				// } else {
+				// 	resp = "Up"
+				// }
+
 				b.Edit(c.Message, "Coming soon...", &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})

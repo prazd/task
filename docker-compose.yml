@@ -6,12 +6,6 @@ services:
     command: ./main
     ports:
       - "3000:3000"
-  bot:
-    container_name: bot
-    build: ./bot
-    command: ./main
-    ports:
-      - "80:80"
   mongo:
     container_name: mongo
     image: mongo
