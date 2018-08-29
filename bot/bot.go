@@ -77,7 +77,7 @@ func main() {
 	// Mongo
 	MongoServices := tb.InlineButton{
 		Unique: "MongServ",
-		Text:   "MongoDB",
+		Text:   "MongoDB 🍃",
 	}
 
 	MongoReboot := tb.InlineButton{
@@ -99,7 +99,7 @@ func main() {
 
 	GoServer := tb.InlineButton{
 		Unique: "GS",
-		Text:   "Server",
+		Text:   "Server 🌐",
 	}
 
 	ServerStart := tb.InlineButton{
