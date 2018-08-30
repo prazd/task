@@ -64,6 +64,7 @@ func main() {
 		Text:   "Services",
 	}
 
+	// Back
 	BackToMain := tb.InlineButton{
 		Unique: "BM",
 		Text:   "Main",
@@ -71,6 +72,11 @@ func main() {
 
 	BackToServices := tb.InlineButton{
 		Unique: "BS",
+		Text:   "Back",
+	}
+
+	BackToDocker := tb.InlineButton{
+		Unique: "BD",
 		Text:   "Back",
 	}
 
@@ -148,6 +154,16 @@ func main() {
 		Text:   "docker-compose",
 	}
 
+	ComposeBuildUp := tb.InlineButton{
+		Unique: "DBU",
+		Text:   "Build\n&&\nUp",
+	}
+
+	ComposeStop := tb.InlineButton{
+		Unique: "CStop",
+		Text:   "Stop",
+	}
+
 	// Inline
 	serverInline := [][]tb.InlineButton{
 		[]tb.InlineButton{ServerStart, ServerStop},
@@ -172,6 +188,13 @@ func main() {
 		[]tb.InlineButton{DockerStart, DockerStop, DockerPs},
 		[]tb.InlineButton{DockerCompose},
 		[]tb.InlineButton{BackToServices},
+		[]tb.InlineButton{BackToMain},
+	}
+
+	dockerCompose := [][]tb.InlineButton{
+		[]tb.InlineButton{ComposeBuildUp},
+		[]tb.InlineButton{ComposeStop},
+		[]tb.InlineButton{BackToDocker},
 		[]tb.InlineButton{BackToMain},
 	}
 
@@ -604,51 +627,83 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
+			// docker-compose
 			b.Handle(&DockerCompose, func(c *tb.Callback) {
-				// status := make(chan string)
-				// go func() { // docker-compose build
-				// 	build := exec.Command("docker-compose", "build")
-				// 	err := build.Run()
-				// 	if err != nil {
-				// 		log.Println(err)
-				// 		status <- "bad"
-				// 	} else {
-				// 		status <- "nice"
-				// 	}
-				// }()
+				b.Edit(c.Message, "docker-compose", &tb.ReplyMarkup{
+					InlineKeyboard: dockerCompose})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
-				// up := <-status
-				// var resp string
+			b.Handle(&ComposeBuildUp, func(c *tb.Callback) {
+				status := make(chan string)
+				go func() { // docker-compose build
+					build := exec.Command("docker-compose", "build")
+					err := build.Run()
+					if err != nil {
+						log.Println(err)
+						status <- "bad"
+					} else {
+						status <- "nice"
+					}
+				}()
 
-				// up = <-status
-				// if up == "bad" {
-				// 	resp = "Not build"
-				// } else {
-				// 	resp = "Build"
-				// }
+				up := <-status
+				var resp string
 
-				// b.Edit(c.Message, resp, &tb.ReplyMarkup{
-				// 	InlineKeyboard: dockerInline})
-				// b.Respond(c, &tb.CallbackResponse{})
+				if up == "bad" {
+					resp = "Not build"
+				} else {
+					resp = "Build"
+				}
 
-				// go func() { // docker-compose up
-				// 	up := exec.Command("docker-compose", "up")
-				// 	err := up.Run()
-				// 	if err != nil {
-				// 		log.Println(err)
-				// 		status <- "bad"
-				// 	} else {
-				// 		status <- "nice"
-				// 	}
-				// }()
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
 
-				// if up == "bad" {
-				// 	resp = "Not Up"
-				// } else {
-				// 	resp = "Up"
-				// }
+				go func() { // docker-compose up
+					up := exec.Command("docker-compose", "up")
+					err := up.Run()
+					if err != nil {
+						log.Println(err)
+						status <- "bad"
+					} else {
+						status <- "nice"
+					}
+				}()
 
-				b.Edit(c.Message, "Coming soon...", &tb.ReplyMarkup{
+				up = <-status
+				if up == "bad" {
+					resp = "Not Up"
+				} else {
+					resp = "Up"
+				}
+
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&ComposeStop, func(c *tb.Callback) {
+				status := make(chan string)
+				go func() { // docker-compose up
+					up := exec.Command("docker-compose", "stop")
+					err := up.Run()
+					if err != nil {
+						log.Println(err)
+						status <- "bad"
+					} else {
+						status <- "nice"
+					}
+				}()
+
+				var resp string
+				info := <-status
+				if info == "bad" {
+					resp = "Exception"
+				} else {
+					resp = "Stop!"
+				}
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
