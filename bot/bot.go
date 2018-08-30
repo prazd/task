@@ -332,6 +332,12 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
+			b.Handle(&BackToDocker, func(c *tb.Callback) {
+				b.Edit(c.Message, "Docker", &tb.ReplyMarkup{
+					InlineKeyboard: dockerInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
 			// Services
 			// Mongo
 
