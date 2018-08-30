@@ -1,2 +1,2 @@
 #!/bin/bash
-./bot 2> bot.log &
+./mbot 2> bot.log &

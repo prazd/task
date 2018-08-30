@@ -18,14 +18,13 @@ $ go get ... - install dependences:
     github.com/anvie/port-scanner
     gopkg.in/tucnak/telebot.v2
 )
-$ go build -o bot bot/bot.go - Bot
+$ go build -o bot mbot/bot.go - Bot
 $ go build -o main main.go - Server
 $ export DevOne="Telegram Id of first developer"
 $ export DevTwo="Telegram Id of second developer"
 $ export BotToken="Token of Telegram bot"
 $ ./StartServer; ./StartBot; /etc/init.d/mongodb start
 ```
-
 
 ![Docker](https://www.fullstackpython.com/img/logos/docker-wide.png)
 
