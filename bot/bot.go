@@ -589,16 +589,16 @@ func main() {
 
 			b.Handle(&DockerStart, func(c *tb.Callback) {
 				info := make(chan string)
-				go func() {
-					dockerstop := exec.Command("systemctl", "start", "docker")
-					err := dockerstop.Run()
-					if err != nil {
-						log.Println(err)
-						info <- "Can't start"
-					} else {
-						info <- "Started"
-					}
-				}()
+				// go func() {
+				dockerstop := exec.Command("systemctl", "start", "docker")
+				err := dockerstop.Run()
+				if err != nil {
+					log.Println(err)
+					info <- "Can't start"
+				} else {
+					info <- "Started"
+				}
+				// }()
 				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
