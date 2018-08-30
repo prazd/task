@@ -23,6 +23,7 @@ $ go build -o server main.go
 $ export DevOne="Telegram Id of first developer"
 $ export DevTwo="Telegram Id of second developer"
 $ export BotToken="Token of Telegram bot"
+$ ./bot && ./server && sudo /etc/init.d/mongodb start
 ```
 
 
