@@ -289,12 +289,10 @@ func main() {
 					active <- stdout.String()
 				}()
 
-				dock := <-active
-
 				mongoPort := ps.IsOpen(27017)
 				serverPort := ps.IsOpen(3000)
 
-				var mongoS, serverS, dockerS string
+				var mongoS, serverS string
 				if mongoPort == true {
 					mongoS = "✔"
 				} else {
@@ -307,12 +305,7 @@ func main() {
 					serverS = "✖"
 				}
 
-				if dock == "active" {
-					dockerS = "✔"
-				} else {
-					dockerS = "✖"
-				}
-				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS + "\n" + "3.Docker" + dockerS
+				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS + "\n" + "3.Docker" + <-active
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline,
