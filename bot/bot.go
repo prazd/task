@@ -72,12 +72,12 @@ func main() {
 
 	BackToServices := tb.InlineButton{
 		Unique: "BS",
-		Text:   "Back",
+		Text:   "🔙",
 	}
 
 	BackToDocker := tb.InlineButton{
 		Unique: "BD",
-		Text:   "Back",
+		Text:   "🔙",
 	}
 
 	// Mongo
@@ -164,6 +164,17 @@ func main() {
 		Text:   "Stop",
 	}
 
+	// ALL
+	StopAllServices := tb.InlineButton{
+		Unique: "ASS",
+		Text:   "Stop 🍃🐳🌐",
+	}
+
+	StartAllServices := tb.InlineButton{
+		Unique: "SSS",
+		Text:   "Start 🍃🐳🌐",
+	}
+
 	// Inline
 	serverInline := [][]tb.InlineButton{
 		[]tb.InlineButton{ServerStart, ServerStop},
@@ -206,6 +217,7 @@ func main() {
 	servicesInline := [][]tb.InlineButton{
 		[]tb.InlineButton{ServicesStatus},
 		[]tb.InlineButton{MongoServices, GoServer, Docker},
+		[]tb.InlineButton{StopAllServices, StartAllServices},
 		[]tb.InlineButton{BotLog},
 		[]tb.InlineButton{BackToMain},
 	}
@@ -265,9 +277,22 @@ func main() {
 
 			b.Handle(&ServicesStatus, func(c *tb.Callback) {
 				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				active := make(chan string)
+				go func() {
+					dockeractive := exec.Command("systemctl", "is-active", "docker")
+					var stdout bytes.Buffer
+					dockeractive.Stdout = &stdout
+					err := dockeractive.Run()
+					if err != nil {
+						log.Println(err)
+					}
+					active <- stdout.String()
+				}()
+
 				mongoPort := ps.IsOpen(27017)
 				serverPort := ps.IsOpen(3000)
-				var mongoS, serverS string
+
+				var mongoS, serverS, dockerS string
 				if mongoPort == true {
 					mongoS = "✔"
 				} else {
@@ -279,7 +304,13 @@ func main() {
 				} else {
 					serverS = "✖"
 				}
-				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS
+
+				if <-active == "active" {
+					dockerS = "✔"
+				} else {
+					dockerS = "✖"
+				}
+				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS + "\n" + "3.Docker" + dockerS
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline,
@@ -356,22 +387,21 @@ func main() {
 			})
 
 			b.Handle(&MongoStop, func(c *tb.Callback) {
-				resp := MongoService("stop")
+				resp := Systemctl("stop", "mongodb")
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
 			b.Handle(&MongoStart, func(c *tb.Callback) {
-				resp := MongoService("start")
+				resp := Systemctl("start", "mongodb")
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
 			b.Handle(&MongoReboot, func(c *tb.Callback) {
-				resp := MongoService("restart")
-
+				resp := Systemctl("restart", "mongodb")
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
 				b.Respond(c, &tb.CallbackResponse{})
@@ -400,27 +430,26 @@ func main() {
 					InlineKeyboard: serverInline})
 				info := make(chan string)
 
-				go func() {
-					serverID := exec.Command("lsof", "-t", "-i:3000")
-					sOut, sErr := serverID.CombinedOutput()
-					if sErr != nil {
-						log.Println(sErr)
-					}
-					ID := string(sOut)
-					ID = strings.Replace(ID, "\n", "", -1)
+				// go func() {
+				// 	serverID := exec.Command("lsof", "-t", "-i:3000")
+				// 	sOut, sErr := serverID.CombinedOutput()
+				// 	if sErr != nil {
+				// 		log.Println(sErr)
+				// 	}
+				// 	ID := string(sOut)
+				// 	ID = strings.Replace(ID, "\n", "", -1)
 
-					info <- ID
+				// 	info <- ID
 
-				}()
-
-				ID := <-info
+				// }()
+				go ServerProcessID(info)
 				// Stop Server
 
 				b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 
 				go func() {
-					serverkillcmd := exec.Command("kill", "-9", ID)
+					serverkillcmd := exec.Command("kill", "-9", <-info)
 					var out bytes.Buffer
 					var stderr bytes.Buffer
 					serverkillcmd.Stdout = &out
@@ -447,27 +476,27 @@ func main() {
 					InlineKeyboard: serverInline})
 
 				// Check status of process
-				go func() {
-					serverID := exec.Command("lsof", "-t", "-i:3000")
+				// go func() {
+				// 	serverID := exec.Command("lsof", "-t", "-i:3000")
 
-					var stderr bytes.Buffer
-					var stdout bytes.Buffer
+				// 	var stderr bytes.Buffer
+				// 	var stdout bytes.Buffer
 
-					serverID.Stderr = &stderr
-					serverID.Stdout = &stdout
-					err := serverID.Run()
-					if err != nil {
-						log.Println(stderr.String(), err)
-					}
+				// 	serverID.Stderr = &stderr
+				// 	serverID.Stdout = &stdout
+				// 	err := serverID.Run()
+				// 	if err != nil {
+				// 		log.Println(stderr.String(), err)
+				// 	}
 
-					ID := stdout.String()
-					ID = strings.Replace(ID, "\n", "", -1)
-					info <- ID
-				}()
-				ID = <-info
+				// 	ID := stdout.String()
+				// 	ID = strings.Replace(ID, "\n", "", -1)
+				// 	info <- ID
+				// }()
+				go ServerProcessID(info)
 				var resp string
 
-				if len(ID) == 0 {
+				if len(<-info) == 0 {
 					resp = "Server stopped"
 				} else {
 					resp = "Server didn't stop"
@@ -494,23 +523,25 @@ func main() {
 				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 
-				go func() {
-					serverID := exec.Command("lsof", "-t", "-i:3000")
+				// go func() {
+				// 	serverID := exec.Command("lsof", "-t", "-i:3000")
 
-					var stderr bytes.Buffer
-					var stdout bytes.Buffer
+				// 	var stderr bytes.Buffer
+				// 	var stdout bytes.Buffer
 
-					serverID.Stderr = &stderr
-					serverID.Stdout = &stdout
-					err := serverID.Run()
-					if err != nil {
-						log.Println(stderr.String(), err)
-					}
+				// 	serverID.Stderr = &stderr
+				// 	serverID.Stdout = &stdout
+				// 	err := serverID.Run()
+				// 	if err != nil {
+				// 		log.Println(stderr.String(), err)
+				// 	}
 
-					ID := stdout.String()
-					ID = strings.Replace(ID, "\n", "", -1)
-					info <- ID
-				}()
+				// 	ID := stdout.String()
+				// 	ID = strings.Replace(ID, "\n", "", -1)
+				// 	info <- ID
+				// }()
+
+				go ServerProcessID(info)
 
 				var resp string
 				if len(<-info) != 0 {
@@ -576,35 +607,15 @@ func main() {
 			})
 
 			b.Handle(&DockerStop, func(c *tb.Callback) {
-				info := make(chan string)
-				go func() {
-					dockerstop := exec.Command("systemctl", "stop", "docker")
-					err := dockerstop.Run()
-					if err != nil {
-						log.Println(err)
-						info <- "Can't stop"
-					} else {
-						info <- "Nice"
-					}
-				}()
-				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+				resp := Systemctl("stop", "docker")
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
 			b.Handle(&DockerStart, func(c *tb.Callback) {
-				info := make(chan string)
-				go func() {
-					dockerstop := exec.Command("systemctl", "start", "docker")
-					err := dockerstop.Run()
-					if err != nil {
-						log.Println(err)
-						info <- "Can't start"
-					} else {
-						info <- "Started"
-					}
-				}()
-				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+				resp := Systemctl("start", "docker")
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
@@ -690,6 +701,13 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
+			// AllServices
+			// b.Handle(&StopAllServices, func(c *tb.Callback) {
+			// 	dockerStop := Systemctl("stop", "docker")
+			// 	mongoStop := Systemctl("stop", "mongodb")
+
+			// })
+
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		}
@@ -698,8 +716,8 @@ func main() {
 	b.Start()
 }
 
-func MongoService(thing string) string {
-	mongocmd := exec.Command("systemctl", thing, "mongodb")
+func Systemctl(thing, service string) string {
+	mongocmd := exec.Command("systemctl", thing, service)
 	err := mongocmd.Run()
 	var resp string
 	if err != nil {
@@ -721,4 +739,21 @@ func MongoService(thing string) string {
 		}
 	}
 	return resp
+}
+
+func ServerProcessID(info chan string) {
+	serverID := exec.Command("lsof", "-t", "-i:3000")
+
+	var stderr bytes.Buffer
+	var stdout bytes.Buffer
+	serverID.Stderr = &stderr
+	serverID.Stdout = &stdout
+	err := serverID.Run()
+	if err != nil {
+		log.Println(stderr.String(), err)
+	}
+
+	ID := stdout.String()
+	ID = strings.Replace(ID, "\n", "", -1)
+	info <- ID
 }
