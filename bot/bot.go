@@ -289,6 +289,8 @@ func main() {
 					active <- stdout.String()
 				}()
 
+				dock := <-active
+
 				mongoPort := ps.IsOpen(27017)
 				serverPort := ps.IsOpen(3000)
 
@@ -305,7 +307,7 @@ func main() {
 					serverS = "✖"
 				}
 
-				if <-active == "active" {
+				if dock == "active" {
 					dockerS = "✔"
 				} else {
 					dockerS = "✖"
@@ -557,8 +559,7 @@ func main() {
 					}
 					info <- stdout.String()
 				}()
-				var resp string
-				resp = <-info
+				resp := <-info
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
