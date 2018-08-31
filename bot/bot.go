@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -443,6 +444,7 @@ func main() {
 
 				// }()
 				go ServerProcessID(info)
+				fmt.Println(info)
 				// Stop Server
 
 				b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
@@ -496,7 +498,8 @@ func main() {
 				go ServerProcessID(info)
 
 				var resp string
-				b.Send(m.Sender, <-info)
+				// b.Send(m.Sender, <-info)
+				fmt.Println(info)
 				if len(<-info) == 0 {
 					resp = "Server stopped"
 				} else {
