@@ -357,29 +357,30 @@ func main() {
 
 			b.Handle(&MongoStop, func(c *tb.Callback) {
 
-				mongocmd := exec.Command("systemctl", "stop", "mongodb")
-				err := mongocmd.Run()
-				resp := "Mongo: Not stopped ✔"
-				if err != nil {
-					log.Println(err)
-				} else {
-					resp = "Mongo: Stopped ✖"
-				}
-
+				// mongocmd := exec.Command("systemctl", "stop", "mongodb")
+				// err := mongocmd.Run()
+				// resp := "Mongo: Not stopped ✔"
+				// if err != nil {
+				// 	log.Println(err)
+				// } else {
+				// 	resp = "Mongo: Stopped ✖"
+				// }
+				resp := MongoService("stop")
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
 			b.Handle(&MongoStart, func(c *tb.Callback) {
-				mongocmd := exec.Command("systemctl", "start", "mongodb")
-				err := mongocmd.Run()
-				resp := "Mongo: Not Start ✖"
-				if err != nil {
-					log.Println(err)
-				} else {
-					resp = "Mongo: Start ✔"
-				}
+				// mongocmd := exec.Command("systemctl", "start", "mongodb")
+				// err := mongocmd.Run()
+				// resp := "Mongo: Not Start ✖"
+				// if err != nil {
+				// 	log.Println(err)
+				// } else {
+				// 	resp = "Mongo: Start ✔"
+				// }
+				resp := MongoService("start")
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
@@ -387,14 +388,15 @@ func main() {
 			})
 
 			b.Handle(&MongoReboot, func(c *tb.Callback) {
-				mongocmd := exec.Command("systemctl", "restart", "mongodb")
-				err := mongocmd.Run()
-				resp := "Mongo: not reboot ✖"
-				if err != nil {
-					log.Println(err)
-				} else {
-					resp = "Mongo: reboot ✔"
-				}
+				// mongocmd := exec.Command("systemctl", "restart", "mongodb")
+				// err := mongocmd.Run()
+				// resp := "Mongo: not reboot ✖"
+				// if err != nil {
+				// 	log.Println(err)
+				// } else {
+				// 	resp = "Mongo: reboot ✔"
+				// }
+				resp := MongoService("reboot")
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
@@ -720,4 +722,29 @@ func main() {
 	})
 
 	b.Start()
+}
+
+func MongoService(thing string) string {
+	mongocmd := exec.Command("systemctl", thing, "mongodb")
+	err := mongocmd.Run()
+	var resp string
+	if err != nil {
+		log.Println(err)
+		if thing == "start" {
+			resp = "Not start !"
+		} else if thing == "stop" {
+			resp = "Not stopped !"
+		} else if thing == "reboot" {
+			resp = "Not rebooted !"
+		}
+	} else {
+		if thing == "start" {
+			resp = "Started:✔"
+		} else if thing == "stop" {
+			resp = "Stopped:✖"
+		} else if thing == "reboot" {
+			resp = "Rebooted:✔"
+		}
+	}
+	return resp
 }
