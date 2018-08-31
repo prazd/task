@@ -396,7 +396,7 @@ func main() {
 				// } else {
 				// 	resp = "Mongo: reboot ✔"
 				// }
-				resp := MongoService("reboot")
+				resp := MongoService("restart")
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
