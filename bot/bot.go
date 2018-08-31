@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -443,15 +442,15 @@ func main() {
 				// 	info <- ID
 
 				// }()
-				go ServerProcessID(&info)
-				fmt.Println(info)
+				ID := ServerProcessID()
+
 				// Stop Server
 
 				b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 
 				go func() {
-					serverkillcmd := exec.Command("kill", "-9", <-info)
+					serverkillcmd := exec.Command("kill", "-9", ID)
 					var out bytes.Buffer
 					var stderr bytes.Buffer
 					serverkillcmd.Stdout = &out
@@ -495,12 +494,11 @@ func main() {
 				// 	ID = strings.Replace(ID, "\n", "", -1)
 				// 	info <- ID
 				// }()
-				go ServerProcessID(&info)
+				ID = ServerProcessID()
 
 				var resp string
-				// b.Send(m.Sender, <-info)
-				fmt.Println(info)
-				if len(<-info) == 0 {
+
+				if len(ID) == 0 {
 					resp = "Server stopped"
 				} else {
 					resp = "Server didn't stop"
@@ -545,10 +543,10 @@ func main() {
 				// 	info <- ID
 				// }()
 
-				go ServerProcessID(&info)
+				ID := ServerProcessID()
 
 				var resp string
-				if len(<-info) != 0 {
+				if len(ID) != 0 {
 					resp = "Nice"
 				} else {
 					resp = "Fail"
@@ -745,7 +743,7 @@ func Systemctl(thing, service string) string {
 	return resp
 }
 
-func ServerProcessID(info *chan string) {
+func ServerProcessID() string {
 	serverID := exec.Command("lsof", "-t", "-i:3000")
 
 	var stderr bytes.Buffer
@@ -759,5 +757,5 @@ func ServerProcessID(info *chan string) {
 
 	ID := stdout.String()
 	ID = strings.Replace(ID, "\n", "", -1)
-	*info <- ID
+	return ID
 }
