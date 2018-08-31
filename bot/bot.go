@@ -356,15 +356,6 @@ func main() {
 			})
 
 			b.Handle(&MongoStop, func(c *tb.Callback) {
-
-				// mongocmd := exec.Command("systemctl", "stop", "mongodb")
-				// err := mongocmd.Run()
-				// resp := "Mongo: Not stopped ✔"
-				// if err != nil {
-				// 	log.Println(err)
-				// } else {
-				// 	resp = "Mongo: Stopped ✖"
-				// }
 				resp := MongoService("stop")
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
@@ -372,30 +363,13 @@ func main() {
 			})
 
 			b.Handle(&MongoStart, func(c *tb.Callback) {
-				// mongocmd := exec.Command("systemctl", "start", "mongodb")
-				// err := mongocmd.Run()
-				// resp := "Mongo: Not Start ✖"
-				// if err != nil {
-				// 	log.Println(err)
-				// } else {
-				// 	resp = "Mongo: Start ✔"
-				// }
 				resp := MongoService("start")
-
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: mongoInline})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
 			b.Handle(&MongoReboot, func(c *tb.Callback) {
-				// mongocmd := exec.Command("systemctl", "restart", "mongodb")
-				// err := mongocmd.Run()
-				// resp := "Mongo: not reboot ✖"
-				// if err != nil {
-				// 	log.Println(err)
-				// } else {
-				// 	resp = "Mongo: reboot ✔"
-				// }
 				resp := MongoService("restart")
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -734,7 +708,7 @@ func MongoService(thing string) string {
 			resp = "Not start !"
 		} else if thing == "stop" {
 			resp = "Not stopped !"
-		} else if thing == "reboot" {
+		} else if thing == "restart" {
 			resp = "Not rebooted !"
 		}
 	} else {
@@ -742,7 +716,7 @@ func MongoService(thing string) string {
 			resp = "Started:✔"
 		} else if thing == "stop" {
 			resp = "Stopped:✖"
-		} else if thing == "reboot" {
+		} else if thing == "restart" {
 			resp = "Rebooted:✔"
 		}
 	}
