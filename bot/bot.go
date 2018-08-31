@@ -430,18 +430,6 @@ func main() {
 					InlineKeyboard: serverInline})
 				info := make(chan string)
 
-				// go func() {
-				// 	serverID := exec.Command("lsof", "-t", "-i:3000")
-				// 	sOut, sErr := serverID.CombinedOutput()
-				// 	if sErr != nil {
-				// 		log.Println(sErr)
-				// 	}
-				// 	ID := string(sOut)
-				// 	ID = strings.Replace(ID, "\n", "", -1)
-
-				// 	info <- ID
-
-				// }()
 				ID := ServerProcessID()
 
 				// Stop Server
@@ -459,8 +447,9 @@ func main() {
 					if err != nil {
 						log.Println(err, stderr.String())
 						info <- "bad"
+					} else {
+						info <- "nice"
 					}
-					info <- "nice"
 				}()
 
 				kill := <-info
@@ -477,23 +466,6 @@ func main() {
 					InlineKeyboard: serverInline})
 
 				// Check status of process
-				// go func() {
-				// 	serverID := exec.Command("lsof", "-t", "-i:3000")
-
-				// 	var stderr bytes.Buffer
-				// 	var stdout bytes.Buffer
-
-				// 	serverID.Stderr = &stderr
-				// 	serverID.Stdout = &stdout
-				// 	err := serverID.Run()
-				// 	if err != nil {
-				// 		log.Println(stderr.String(), err)
-				// 	}
-
-				// 	ID := stdout.String()
-				// 	ID = strings.Replace(ID, "\n", "", -1)
-				// 	info <- ID
-				// }()
 				ID = ServerProcessID()
 
 				var resp string
@@ -518,30 +490,14 @@ func main() {
 					if err != nil {
 						log.Println(err)
 						info <- "Fail"
+					} else {
+						info <- "Starting..."
 					}
-					info <- "Starting..."
+
 				}()
 
 				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
-
-				// go func() {
-				// 	serverID := exec.Command("lsof", "-t", "-i:3000")
-
-				// 	var stderr bytes.Buffer
-				// 	var stdout bytes.Buffer
-
-				// 	serverID.Stderr = &stderr
-				// 	serverID.Stdout = &stdout
-				// 	err := serverID.Run()
-				// 	if err != nil {
-				// 		log.Println(stderr.String(), err)
-				// 	}
-
-				// 	ID := stdout.String()
-				// 	ID = strings.Replace(ID, "\n", "", -1)
-				// 	info <- ID
-				// }()
 
 				ID := ServerProcessID()
 
@@ -703,10 +659,17 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
-			// AllServices
+			//AllServices
+
 			// b.Handle(&StopAllServices, func(c *tb.Callback) {
 			// 	dockerStop := Systemctl("stop", "docker")
 			// 	mongoStop := Systemctl("stop", "mongodb")
+
+			// })
+
+			// b.Handle(&StartAllServices, func(c *tb.Callback) {
+			// 	dockerStart := Systemctl("stop", "docker")
+			// 	mongoStart := Systemctl("stop", "mongodb")
 
 			// })
 
@@ -744,7 +707,7 @@ func Systemctl(thing, service string) string {
 }
 
 func ServerProcessID() string {
-	serverID := exec.Command("lsof", "-t", "-i:3000")
+	serverID := exec.Command("lsof", "-ti:3000")
 
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
