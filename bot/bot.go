@@ -496,7 +496,7 @@ func main() {
 				go ServerProcessID(&info)
 
 				var resp string
-
+				b.Send(m.Sender, <-info)
 				if len(<-info) == 0 {
 					resp = "Server stopped"
 				} else {
