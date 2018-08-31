@@ -442,7 +442,7 @@ func main() {
 				// 	info <- ID
 
 				// }()
-				go ServerProcessID(&info)
+				go ServerProcessID(info)
 				// Stop Server
 
 				b.Edit(c.Message, "kill the process...", &tb.ReplyMarkup{
@@ -493,7 +493,7 @@ func main() {
 				// 	ID = strings.Replace(ID, "\n", "", -1)
 				// 	info <- ID
 				// }()
-				go ServerProcessID(&info)
+				go ServerProcessID(info)
 
 				var resp string
 				b.Send(m.Sender, <-info)
@@ -542,7 +542,7 @@ func main() {
 				// 	info <- ID
 				// }()
 
-				go ServerProcessID(&info)
+				go ServerProcessID(info)
 
 				var resp string
 				if len(<-info) != 0 {
@@ -742,7 +742,7 @@ func Systemctl(thing, service string) string {
 	return resp
 }
 
-func ServerProcessID(info *chan string) {
+func ServerProcessID(info chan string) {
 	serverID := exec.Command("lsof", "-t", "-i:3000")
 
 	var stderr bytes.Buffer
@@ -756,5 +756,5 @@ func ServerProcessID(info *chan string) {
 
 	ID := stdout.String()
 	ID = strings.Replace(ID, "\n", "", -1)
-	*info <- ID
+	info <- ID
 }
