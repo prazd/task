@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -306,11 +305,11 @@ func main() {
 					serverS = "✖"
 				}
 
-				if <-active == "active" {
-					fmt.Println(123)
-				}
+				// if <-active == "active" {
+				// 	fmt.Println(123)
+				// }
 
-				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS + "\n" + "3.Docker" + <-active
+				resp := "1.Mongo:" + mongoS + "\n" + "2.Server:" + serverS + "\n" + "3.Docker:" + <-active
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline,
