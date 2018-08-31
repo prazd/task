@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -303,6 +304,10 @@ func main() {
 					serverS = "✔"
 				} else {
 					serverS = "✖"
+				}
+
+				if <-active == "active" {
+					fmt.Println(123)
 				}
 
 				resp := "1.Mongo:" + mongoS + "\n" + "2.Server" + serverS + "\n" + "3.Docker" + <-active
