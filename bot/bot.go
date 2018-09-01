@@ -652,6 +652,7 @@ func main() {
 				} else {
 					resp = "Stop!"
 				}
+
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
@@ -683,7 +684,7 @@ func main() {
 				} else {
 					serverStop = "Run"
 				}
-				resp := "1.MongoDB" + mongoStop + "\n" + "2.Server" + serverStop
+				resp := "1.🍃:" + mongoStop + "\n" + "2.🌐:" + serverStop
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
 				b.Respond(c, &tb.CallbackResponse{})
@@ -701,17 +702,15 @@ func main() {
 					}
 				}()
 
-				ID := ServerProcessID()
-
-				var serverInfo string
-				if len(ID) != 0 {
-					serverInfo = "Start"
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(3000)
+				var serverStart string
+				if serverPort == false {
+					serverStart = "Stop"
 				} else {
-					serverInfo = "Fail"
+					serverStart = "Run"
 				}
-
-				resp := "Start MongoDB:" + mongoStart + "\n" + "Start Server" + serverInfo
-
+				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
 				b.Respond(c, &tb.CallbackResponse{})
