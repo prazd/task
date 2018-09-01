@@ -167,12 +167,12 @@ func main() {
 	// ALL
 	StopAllServices := tb.InlineButton{
 		Unique: "ASS",
-		Text:   "Stop 🍃🐳🌐",
+		Text:   "Stop 🍃🌐",
 	}
 
 	StartAllServices := tb.InlineButton{
 		Unique: "SSS",
-		Text:   "Start 🍃🐳🌐",
+		Text:   "Start 🍃🌐",
 	}
 
 	// Inline
@@ -464,12 +464,12 @@ func main() {
 				b.Edit(c.Message, "Check status of process....", &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 
-				// Check status of process
-				ID = ServerProcessID()
+				// // Check status of process
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(3000)
 
 				var resp string
-
-				if len(ID) == 0 {
+				if serverPort == false {
 					resp = "Server stopped"
 				} else {
 					resp = "Server didn't stop"
@@ -498,10 +498,10 @@ func main() {
 				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: serverInline})
 
-				ID := ServerProcessID()
-
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(3000)
 				var resp string
-				if len(ID) != 0 {
+				if serverPort == true {
 					resp = "Nice"
 				} else {
 					resp = "Fail"
@@ -659,17 +659,63 @@ func main() {
 
 			//AllServices
 
-			// b.Handle(&StopAllServices, func(c *tb.Callback) {
-			// 	dockerStop := Systemctl("stop", "docker")
-			// 	mongoStop := Systemctl("stop", "mongodb")
+			b.Handle(&StopAllServices, func(c *tb.Callback) {
+				mongoStop := Systemctl("stop", "mongodb")
+				// Server Stop
+				ID := ServerProcessID()
+				go func() {
+					serverkillcmd := exec.Command("kill", "-9", ID)
+					var out bytes.Buffer
+					var stderr bytes.Buffer
+					serverkillcmd.Stdout = &out
+					serverkillcmd.Stderr = &stderr
+					err := serverkillcmd.Run()
+					if err != nil {
+						log.Println(err, stderr.String())
+					}
+				}()
+				// Check status
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(3000)
+				var serverStop string
+				if serverPort == false {
+					serverStop = "Stop"
+				} else {
+					serverStop = "Run"
+				}
+				resp := "1.MongoDB" + mongoStop + "\n" + "2.Server" + serverStop
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline})
+				b.Respond(c, &tb.CallbackResponse{})
 
-			// })
+			})
 
-			// b.Handle(&StartAllServices, func(c *tb.Callback) {
-			// 	dockerStart := Systemctl("stop", "docker")
-			// 	mongoStart := Systemctl("stop", "mongodb")
+			b.Handle(&StartAllServices, func(c *tb.Callback) {
+				mongoStart := Systemctl("stop", "mongodb")
+				// Start Server
+				go func() {
+					serverStart := exec.Command("./StartServer.sh")
+					err := serverStart.Run()
+					if err != nil {
+						log.Println(err)
+					}
+				}()
 
-			// })
+				ID := ServerProcessID()
+
+				var serverInfo string
+				if len(ID) != 0 {
+					serverInfo = "Start"
+				} else {
+					serverInfo = "Fail"
+				}
+
+				resp := "Start MongoDB:" + mongoStart + "\n" + "Start Server" + serverInfo
+
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
 
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
