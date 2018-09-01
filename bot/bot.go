@@ -692,7 +692,7 @@ func main() {
 			})
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
-				mongoStart := Systemctl("stop", "mongodb")
+				mongoStart := Systemctl("start", "mongodb")
 				// Start Server
 				go func() {
 					serverStart := exec.Command("./StartServer.sh")
@@ -703,8 +703,10 @@ func main() {
 				}()
 
 				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+
 				serverPort := ps.IsOpen(3000)
 				var serverStart string
+
 				if serverPort == false {
 					serverStart = "Stop"
 				} else {
