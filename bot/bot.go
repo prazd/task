@@ -704,7 +704,7 @@ func main() {
 				var serverPort bool
 				var count int
 				for {
-					if count > 20 {
+					if count > 1000 {
 						serverStart = "Problems"
 						break
 					}
