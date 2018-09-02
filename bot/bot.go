@@ -702,16 +702,19 @@ func main() {
 				}
 
 				var serverPort bool
+				var count int
 				for {
-					serverPort = ps.IsOpen(3000)
-					if serverPort == true {
+					if count > 20 {
+						serverStart = "Problems"
 						break
 					}
+					serverPort = ps.IsOpen(3000)
+					if serverPort == true {
+						serverStart = "ServerStart"
+						break
+					}
+					count++
 				}
-				if serverPort == true {
-					serverStart = "ServerStart"
-				}
-
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
