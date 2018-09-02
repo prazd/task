@@ -713,7 +713,7 @@ func main() {
 						infoServer <- "Server start"
 					}
 				}()
-
+				wg.Wait()
 				serverStart := <-infoServer // <- CHEC THIS THING
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				wg.Add(1)
