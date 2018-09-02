@@ -700,7 +700,8 @@ func main() {
 					if err != nil {
 						log.Println(err)
 					}
-					ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+
+					ps := portscanner.NewPortScanner("localhost", 5*time1.Second, 5)
 					serverPort := ps.IsOpen(3000)
 
 					if serverPort == false {
