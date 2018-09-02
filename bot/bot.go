@@ -660,9 +660,8 @@ func main() {
 				mongoStop := Systemctl("stop", "mongodb")
 				// Server Stop
 				info := make(chan string)
-
-				ID := ServerProcessID()
 				go func() {
+					ID := ServerProcessID()
 					serverkillcmd := exec.Command("kill", "-9", ID)
 					var out bytes.Buffer
 					var stderr bytes.Buffer
@@ -672,7 +671,7 @@ func main() {
 					if err != nil {
 						log.Println(err, stderr.String())
 					}
-					ps := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
+					ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
 					serverPort := ps.IsOpen(3000)
 					if serverPort == false {
 						info <- "Server stopped"
@@ -691,7 +690,6 @@ func main() {
 			})
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
-
 				infoServer := make(chan string)
 				infoMongo := make(chan string)
 				go func() {
@@ -701,7 +699,7 @@ func main() {
 						log.Println(err)
 					}
 
-					ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+					ps := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
 					serverPort := ps.IsOpen(3000)
 
 					if serverPort == false {
