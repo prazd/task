@@ -714,14 +714,16 @@ func main() {
 					}
 				}()
 
-				wg.Wait()
-
 				serverStart := <-infoServer // <- CHEC THIS THING
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
-
-				b.Edit(c.Message, resp, &tb.ReplyMarkup{
-					InlineKeyboard: servicesInline})
-				b.Respond(c, &tb.CallbackResponse{})
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					b.Edit(c.Message, resp, &tb.ReplyMarkup{
+						InlineKeyboard: servicesInline})
+					b.Respond(c, &tb.CallbackResponse{})
+				}()
+				wg.Wait()
 			})
 
 		} else {
