@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"./mongo"
@@ -691,39 +690,42 @@ func main() {
 			})
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
-				infoServer := make(chan string)
+
 				mongoStart := Systemctl("start", "mongodb")
-				var wg sync.WaitGroup
+				var serverStart string
+				// var wg sync.WaitGroup
 
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					serverStart := exec.Command("./StartServer.sh")
-					err := serverStart.Run()
-					if err != nil {
-						log.Println(err)
-					}
+				// wg.Add(1)
+				// go func() {
+				// defer wg.Done()
+				serverS := exec.Command("./StartServer.sh")
+				err := serverS.Run()
+				if err != nil {
+					log.Println(err)
+				}
 
-					ps := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
-					serverPort := ps.IsOpen(3000)
+				ps := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
+				time.Sleep(2000 * time.Microsecond)
+				serverPort := ps.IsOpen(3000)
+				if serverPort == false {
+					serverStart = "Server not start"
+				} else {
+					serverStart = "Server start"
+				}
+				// }()
 
-					if serverPort == false {
-						infoServer <- "Server not start"
-					} else {
-						infoServer <- "Server start"
-					}
-				}()
-				wg.Wait()
-				serverStart := <-infoServer // <- CHEC THIS THING
+				// serverStart = <-infoServer // <- CHEC THIS THING
+
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					b.Edit(c.Message, resp, &tb.ReplyMarkup{
-						InlineKeyboard: servicesInline})
-					b.Respond(c, &tb.CallbackResponse{})
-				}()
-				wg.Wait()
+				// wg.Add(1)
+				// go func() {
+				// defer wg.Done()
+
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: servicesInline})
+				b.Respond(c, &tb.CallbackResponse{})
+				// }()
+				// wg.Wait()
 			})
 
 		} else {
