@@ -691,9 +691,9 @@ func main() {
 			})
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
-				mongoStart := Systemctl("start", "mongodb")
-				// Start Server
-				info := make(chan string)
+
+				infoServer := make(chan string)
+				infoMongo := make(chan string)
 				go func() {
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
@@ -705,14 +705,16 @@ func main() {
 					serverPort := ps.IsOpen(3000)
 
 					if serverPort == false {
-						info <- "Server not start"
+						infoServer <- "Server not start"
 					} else {
-						info <- "Server start"
+						infoServer <- "Server start"
 					}
 
+					infoMongo <- Systemctl("start", "mongodb")
 				}()
 
-				serverStart := <-info // <- CHEC THIS THING
+				mongoStart := <-infoMongo
+				serverStart := <-infoServer // <- CHEC THIS THING
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
