@@ -708,9 +708,12 @@ func main() {
 				time.Sleep(2000 * time.Microsecond)
 				serverPort := ps.IsOpen(3000)
 				if serverPort == false {
+					serverPort = ps.IsOpen(3000)
+				}
+				if serverPort == false {
 					serverStart = "Server not start"
 				} else {
-					serverStart = "Server start"
+					serverStart = "Server started"
 				}
 				// }()
 
