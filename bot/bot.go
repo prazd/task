@@ -691,7 +691,6 @@ func main() {
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
 				infoServer := make(chan string)
-				infoMongo := make(chan string)
 				go func() {
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
@@ -708,10 +707,9 @@ func main() {
 						infoServer <- "Server start"
 					}
 
-					infoMongo <- Systemctl("start", "mongodb")
 				}()
 
-				mongoStart := <-infoMongo
+				mongoStart := Systemctl("start", "mongodb")
 				serverStart := <-infoServer // <- CHEC THIS THING
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
