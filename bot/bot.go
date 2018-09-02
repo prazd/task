@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"./mongo"
@@ -692,7 +693,8 @@ func main() {
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
 				infoServer := make(chan string)
 				infoMongo := make(chan string)
-				go func() {
+				var wg sync.WaitGroup
+				go func(wg *sync.WaitGroup) {
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
 					if err != nil {
@@ -714,16 +716,18 @@ func main() {
 					mongoPort := ms.IsOpen(27017)
 
 					if mongoPort == false {
-						infoMongo <- "Mongo Stop"
+						infoMongo <- "Mongo not start"
 					} else {
-						infoMongo <- "Mongo not stop"
+						infoMongo <- "Mongo start"
 					}
-
-				}()
-
+					wg.Done()
+				}(&wg)
+				wg.Wait()
 				serverStart := <-infoServer // <- CHEC THIS THING
 				mongoStart := <-infoMongo
+
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
+
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
 				b.Respond(c, &tb.CallbackResponse{})
