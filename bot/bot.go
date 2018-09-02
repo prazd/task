@@ -659,6 +659,8 @@ func main() {
 			b.Handle(&StopAllServices, func(c *tb.Callback) {
 				mongoStop := Systemctl("stop", "mongodb")
 				// Server Stop
+				info := make(chan string)
+
 				ID := ServerProcessID()
 				go func() {
 					serverkillcmd := exec.Command("kill", "-9", ID)
@@ -670,16 +672,17 @@ func main() {
 					if err != nil {
 						log.Println(err, stderr.String())
 					}
+					ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+					serverPort := ps.IsOpen(3000)
+					if serverPort == false {
+						info <- "Server stopped"
+					} else {
+						info <- "Server not stopped"
+					}
+
 				}()
-				// Check status
-				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
-				serverPort := ps.IsOpen(3000)
-				var serverStop string
-				if serverPort == false {
-					serverStop = "Stopped"
-				} else {
-					serverStop = "Not stopeed"
-				}
+				// Check status <- CHECKTHIS THING
+				serverStop := <-info
 				resp := "1.🍃:" + mongoStop + "\n" + "2.🌐:" + serverStop
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
@@ -690,24 +693,25 @@ func main() {
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
 				mongoStart := Systemctl("start", "mongodb")
 				// Start Server
+				info := make(chan string)
 				go func() {
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
 					if err != nil {
 						log.Println(err)
 					}
+					ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+					serverPort := ps.IsOpen(3000)
+
+					if serverPort == false {
+						info <- "Server not start"
+					} else {
+						info <- "Server start"
+					}
+
 				}()
 
-				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
-
-				serverPort := ps.IsOpen(3000)
-				var serverStart string
-
-				if serverPort == false {
-					serverStart = "Not started"
-				} else {
-					serverStart = "Started"
-				}
+				serverStart := <-info // <- CHEC THIS THING
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
