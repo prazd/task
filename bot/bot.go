@@ -696,7 +696,8 @@ func main() {
 				var wg sync.WaitGroup
 
 				wg.Add(1)
-				go func(wg *sync.WaitGroup) {
+				go func() {
+					defer wg.Done()
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
 					if err != nil {
@@ -711,10 +712,10 @@ func main() {
 					} else {
 						infoServer <- "Server start"
 					}
-					wg.Done()
-				}(&wg)
+				}()
 
 				wg.Wait()
+
 				serverStart := <-infoServer // <- CHEC THIS THING
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 
