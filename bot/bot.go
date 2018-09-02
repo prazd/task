@@ -691,6 +691,7 @@ func main() {
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
 				infoServer := make(chan string)
+				infoMongo := make(chan string)
 				go func() {
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
@@ -707,10 +708,21 @@ func main() {
 						infoServer <- "Server start"
 					}
 
+					Systemctl("start", "mongodb")
+
+					ms := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
+					mongoPort := ms.IsOpen(27017)
+
+					if mongoPort == false {
+						infoMongo <- "Mongo Stop"
+					} else {
+						infoMongo <- "Mongo not stop"
+					}
+
 				}()
 
-				mongoStart := Systemctl("start", "mongodb")
 				serverStart := <-infoServer // <- CHEC THIS THING
+				mongoStart := <-infoMongo
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
