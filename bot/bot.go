@@ -694,6 +694,7 @@ func main() {
 				infoServer := make(chan string)
 				infoMongo := make(chan string)
 				var wg sync.WaitGroup
+				wg.Add(1)
 				go func(wg *sync.WaitGroup) {
 					serverStart := exec.Command("./StartServer.sh")
 					err := serverStart.Run()
@@ -720,8 +721,10 @@ func main() {
 					} else {
 						infoMongo <- "Mongo start"
 					}
+
 					wg.Done()
 				}(&wg)
+
 				wg.Wait()
 				serverStart := <-infoServer // <- CHEC THIS THING
 				mongoStart := <-infoMongo
