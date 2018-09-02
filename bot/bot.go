@@ -691,44 +691,33 @@ func main() {
 
 			b.Handle(&StartAllServices, func(c *tb.Callback) {
 
+				ps := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
 				mongoStart := Systemctl("start", "mongodb")
 				var serverStart string
-				// var wg sync.WaitGroup
 
-				// wg.Add(1)
-				// go func() {
-				// defer wg.Done()
 				serverS := exec.Command("./StartServer.sh")
 				err := serverS.Run()
 				if err != nil {
 					log.Println(err)
 				}
 
-				ps := portscanner.NewPortScanner("localhost", 5*time.Second, 5)
-				time.Sleep(2000 * time.Microsecond)
-				serverPort := ps.IsOpen(3000)
-				if serverPort == false {
+				var serverPort bool
+				for {
 					serverPort = ps.IsOpen(3000)
+					if serverPort == true {
+						break
+					}
 				}
-				if serverPort == false {
-					serverStart = "Server not start"
-				} else {
-					serverStart = "Server started"
+				if serverPort == true {
+					serverStart = "ServerStart"
 				}
-				// }()
-
-				// serverStart = <-infoServer // <- CHEC THIS THING
 
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
-				// wg.Add(1)
-				// go func() {
-				// defer wg.Done()
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
 					InlineKeyboard: servicesInline})
 				b.Respond(c, &tb.CallbackResponse{})
-				// }()
-				// wg.Wait()
+
 			})
 
 		} else {
