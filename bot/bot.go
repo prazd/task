@@ -305,10 +305,6 @@ func main() {
 					serverS = "✖"
 				}
 
-				// if <-active == "active" {
-				// 	fmt.Println(123)
-				// }
-
 				resp := "1.Mongo:" + mongoS + "\n" + "2.Server:" + serverS + "\n" + "3.Docker:" + <-active
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -680,9 +676,9 @@ func main() {
 				serverPort := ps.IsOpen(3000)
 				var serverStop string
 				if serverPort == false {
-					serverStop = "Stop"
+					serverStop = "Stopped"
 				} else {
-					serverStop = "Run"
+					serverStop = "Not stopeed"
 				}
 				resp := "1.🍃:" + mongoStop + "\n" + "2.🌐:" + serverStop
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -708,9 +704,9 @@ func main() {
 				var serverStart string
 
 				if serverPort == false {
-					serverStart = "Stop"
+					serverStart = "Not started"
 				} else {
-					serverStart = "Run"
+					serverStart = "Started"
 				}
 				resp := "1.🍃:" + mongoStart + "\n" + "2.🌐" + serverStart
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
