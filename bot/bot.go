@@ -169,6 +169,11 @@ func main() {
 		Text:   "Stop",
 	}
 
+	ComposePs := tb.InlineButton{
+		Unique: "ComposePs",
+		Text:   "PS",
+	}
+
 	ComposeCheckServer := tb.InlineButton{
 		Unique: "CCS",
 		Text:   "Server",
@@ -218,7 +223,7 @@ func main() {
 	}
 
 	dockerCompose := [][]tb.InlineButton{
-		[]tb.InlineButton{ComposeBuild, DockerPs, ComposeUp},
+		[]tb.InlineButton{ComposeBuild, ComposePs, ComposeUp},
 		[]tb.InlineButton{ComposeStop},
 		[]tb.InlineButton{ComposeCheckMongo, ComposeCheckServer},
 		[]tb.InlineButton{BackToDocker},
@@ -666,6 +671,23 @@ func main() {
 					resp = "Active"
 				}
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerCompose})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&ComposePs, func(c *tb.Callback) {
+				info := make(chan string)
+				go func() {
+					ps := exec.Command("docker", "ps")
+					var stdout bytes.Buffer
+					ps.Stdout = &stdout
+					err := ps.Run()
+					if err != nil {
+						log.Println(err)
+					}
+					info <- stdout.String()
+				}()
+				b.Edit(c.Message, <-info, &tb.ReplyMarkup{
 					InlineKeyboard: dockerCompose})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
