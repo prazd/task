@@ -591,52 +591,31 @@ func main() {
 			})
 
 			b.Handle(&ComposeBuildUp, func(c *tb.Callback) {
-				status := make(chan string)
+				// docker-compose build
+				build := exec.Command("docker-compose", "build")
+				var stdout bytes.Buffer
+				build.Stdout = &stdout
 
-				go func() { // docker-compose build
-					build := exec.Command("docker-compose", "build")
-					err := build.Run()
-					if err != nil {
-						log.Println(err)
-						status <- "bad"
-					} else {
-						status <- "nice"
-					}
-				}()
-
-				up := <-status
-				var resp string
-
-				if up == "bad" {
-					resp = "Not build"
-				} else {
-					resp = "Build"
+				err := build.Run()
+				if err != nil {
+					log.Println(err)
 				}
 
-				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+				b.Edit(c.Message, stdout, &tb.ReplyMarkup{
 					InlineKeyboard: dockerInline})
 				b.Respond(c, &tb.CallbackResponse{})
 
-				go func() { // docker-compose up
-					up := exec.Command("docker-compose", "up")
-					err := up.Run()
-					if err != nil {
-						log.Println(err)
-						status <- "bad"
-					} else {
-						status <- "nice"
-					}
-				}()
-
-				up = <-status
-				if up == "bad" {
-					resp = "Not Up"
-				} else {
-					resp = "Up"
+				// docker-compose up
+				up := exec.Command("docker-compose", "up")
+				var upStdout bytes.Buffer
+				up.Stdout = &upStdout
+				err = up.Run()
+				if err != nil {
+					log.Println(err)
 				}
-
-				b.Edit(c.Message, resp, &tb.ReplyMarkup{
-					InlineKeyboard: dockerInline})
+				// Check ///////////////////////////////////////////////////////////////////
+				b.Edit(c.Message, upStdout, &tb.ReplyMarkup{
+					InlineKeyboard: dockerCompose})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
