@@ -1,6 +1,7 @@
 FROM golang:latest
 RUN mkdir /goapp
 ADD . /goapp
+ENV CONN="mongodb://mongo:27017"
 WORKDIR /goapp
 
 RUN go get golang.org/x/crypto/bcrypt
