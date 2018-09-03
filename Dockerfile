@@ -9,9 +9,9 @@ RUN go get gopkg.in/mgo.v2/bson
 
 
 RUN go build -o main .
+RUN echo "export Check=100023 >> .bashrc" 
 
 EXPOSE 3000
-
 CMD ['/goapp/main']
 
 

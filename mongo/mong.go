@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"log"
+	"os"
 	"strconv"
 
 	s "../sett"
@@ -18,8 +19,9 @@ const (
 	VDBNAME = "vol"
 	ICOL    = "invalids"
 	VCOL    = "volonters"
-	CONN    = LOCAL
 )
+
+var CONN = os.Getenv("CONN")
 
 func InvSin(id, password string) (string, string, string) {
 

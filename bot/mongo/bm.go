@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"log"
+	"os"
 	"strconv"
 
 	mgo "gopkg.in/mgo.v2"
@@ -114,4 +115,8 @@ func SI() [][2]string {
 		}
 	}
 	return result
+}
+
+func getConnenv() string {
+	return os.Getenv("Check")
 }

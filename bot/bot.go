@@ -466,9 +466,9 @@ func main() {
 
 				var resp string
 				if serverPort == false {
-					resp = "Server stopped"
+					resp = "Stopped:✖"
 				} else {
-					resp = "Server didn't stop"
+					resp = "Problems"
 				}
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
@@ -710,7 +710,7 @@ func main() {
 					}
 					serverPort = ps.IsOpen(3000)
 					if serverPort == true {
-						serverStart = "ServerStart"
+						serverStart = "Started:✔"
 						break
 					}
 					count++
