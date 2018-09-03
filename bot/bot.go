@@ -131,12 +131,12 @@ func main() {
 
 	DockerStart := tb.InlineButton{
 		Unique: "DockerStart",
-		Text:   "Start",
+		Text:   "Start🐳",
 	}
 
 	DockerStop := tb.InlineButton{
 		Unique: "DockerStop",
-		Text:   "Stop",
+		Text:   "Stop🐳",
 	}
 
 	DockerStatus := tb.InlineButton{
