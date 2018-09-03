@@ -164,6 +164,16 @@ func main() {
 		Text:   "Stop",
 	}
 
+	ComposeCheckServer := tb.InlineButton{
+		Unique: "CCS",
+		Text:   "Server",
+	}
+
+	ComposeCheckMongo := tb.InlineButton{
+		Unique: "CCM",
+		Text:   "Mongo",
+	}
+
 	// ALL
 	StopAllServices := tb.InlineButton{
 		Unique: "ASS",
@@ -205,6 +215,7 @@ func main() {
 	dockerCompose := [][]tb.InlineButton{
 		[]tb.InlineButton{ComposeBuildUp},
 		[]tb.InlineButton{ComposeStop},
+		[]tb.InlineButton{ComposeCheckMongo, ComposeCheckServer},
 		[]tb.InlineButton{BackToDocker},
 		[]tb.InlineButton{BackToMain},
 	}
@@ -581,6 +592,7 @@ func main() {
 
 			b.Handle(&ComposeBuildUp, func(c *tb.Callback) {
 				status := make(chan string)
+
 				go func() { // docker-compose build
 					build := exec.Command("docker-compose", "build")
 					err := build.Run()
@@ -654,6 +666,34 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
+			b.Handle(&ComposeCheckServer, func(c *tb.Callback) {
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(3000)
+				var resp string
+				if serverPort == false {
+					resp = "Server is not active"
+				} else {
+					resp = "Active"
+				}
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerCompose})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
+			b.Handle(&ComposeCheckMongo, func(c *tb.Callback) {
+				ps := portscanner.NewPortScanner("localhost", 2*time.Second, 5)
+				serverPort := ps.IsOpen(27017)
+				var resp string
+				if serverPort == false {
+					resp = "Mongo is not active"
+				} else {
+					resp = "Active"
+				}
+				b.Edit(c.Message, resp, &tb.ReplyMarkup{
+					InlineKeyboard: dockerCompose})
+				b.Respond(c, &tb.CallbackResponse{})
+			})
+
 			//AllServices
 
 			b.Handle(&StopAllServices, func(c *tb.Callback) {
@@ -680,7 +720,7 @@ func main() {
 					}
 
 				}()
-				// Check status <- CHECKTHIS THING
+				// Check status
 				serverStop := <-info
 				resp := "1.🍃:" + mongoStop + "\n" + "2.🌐:" + serverStop
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
