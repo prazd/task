@@ -643,7 +643,7 @@ func main() {
 				}
 
 				b.Edit(c.Message, resp, &tb.ReplyMarkup{
-					InlineKeyboard: dockerInline})
+					InlineKeyboard: dockerCompose})
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
