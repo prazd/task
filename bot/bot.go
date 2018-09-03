@@ -154,9 +154,14 @@ func main() {
 		Text:   "docker-compose",
 	}
 
-	ComposeBuildUp := tb.InlineButton{
-		Unique: "DBU",
-		Text:   "Build\n&&\nUp",
+	ComposeBuild := tb.InlineButton{
+		Unique: "ComposerBuild",
+		Text:   "DC-Build",
+	}
+
+	ComposeUp := tb.InlineButton{
+		Unique: "ComposerUp",
+		Text:   "DC-Up",
 	}
 
 	ComposeStop := tb.InlineButton{
@@ -213,7 +218,7 @@ func main() {
 	}
 
 	dockerCompose := [][]tb.InlineButton{
-		[]tb.InlineButton{ComposeBuildUp},
+		[]tb.InlineButton{ComposeBuild, DockerPs, ComposeUp},
 		[]tb.InlineButton{ComposeStop},
 		[]tb.InlineButton{ComposeCheckMongo, ComposeCheckServer},
 		[]tb.InlineButton{BackToDocker},
@@ -590,33 +595,25 @@ func main() {
 				b.Respond(c, &tb.CallbackResponse{})
 			})
 
-			b.Handle(&ComposeBuildUp, func(c *tb.Callback) {
+			b.Handle(&ComposeBuild, func(c *tb.Callback) {
 				// docker-compose build
-				build := exec.Command("docker-compose", "build")
-				var stdout bytes.Buffer
-				build.Stdout = &stdout
+				go func() {
+					build := exec.Command("docker-compose", "build")
+					err := build.Run()
+					if err != nil {
+						log.Println(err)
+					}
+				}()
+			})
 
-				err := build.Run()
-				if err != nil {
-					log.Println(err)
-				}
-
-				b.Edit(c.Message, stdout, &tb.ReplyMarkup{
-					InlineKeyboard: dockerInline})
-				b.Respond(c, &tb.CallbackResponse{})
-
-				// docker-compose up
-				up := exec.Command("docker-compose", "up")
-				var upStdout bytes.Buffer
-				up.Stdout = &upStdout
-				err = up.Run()
-				if err != nil {
-					log.Println(err)
-				}
-				// Check ///////////////////////////////////////////////////////////////////
-				b.Edit(c.Message, upStdout, &tb.ReplyMarkup{
-					InlineKeyboard: dockerCompose})
-				b.Respond(c, &tb.CallbackResponse{})
+			b.Handle(&ComposeUp, func(c *tb.Callback) {
+				go func() {
+					up := exec.Command("docker-compose", "up")
+					err := up.Run()
+					if err != nil {
+						log.Println(err)
+					}
+				}()
 			})
 
 			b.Handle(&ComposeStop, func(c *tb.Callback) {
