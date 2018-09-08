@@ -14,19 +14,19 @@ import (
 
 func main() {
 
-	http.HandleFunc("/inv/up", InvSignUp)
-	http.HandleFunc("/inv/in", InvSignIn)
-	http.HandleFunc("/vol/up", VolSignUp)
-	http.HandleFunc("/vol/in", VolSignIn)
-	http.HandleFunc("/vol/ex", VolExit)
-	http.HandleFunc("/inv/ex", InvExit)
-	http.HandleFunc("/vol/geolist", VGeoList)
-	http.HandleFunc("/inv/geolist", IGeoList)
-	http.HandleFunc("/vol/getrev", GetVRev)
-	http.HandleFunc("/vol/chrev", ChangeVRev)
-	http.HandleFunc("/vol/ch", VolHelp)
-	http.HandleFunc("/inv/nh", InvHelp)
-	http.HandleFunc("/findhelp", FHelp)
+	http.HandleFunc("/inv/up", PostOnly(InvSignUp))
+	http.HandleFunc("/inv/in", PostOnly(InvSignIn))
+	http.HandleFunc("/vol/up", PostOnly(VolSignUp))
+	http.HandleFunc("/vol/in", PostOnly(VolSignIn))
+	http.HandleFunc("/vol/ex", PostOnly(VolExit))
+	http.HandleFunc("/inv/ex", PostOnly(InvExit))
+	http.HandleFunc("/vol/geolist", GetOnly(VGeoList))
+	http.HandleFunc("/inv/geolist", GetOnly(IGeoList))
+	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))
+	http.HandleFunc("/vol/chrev", PostOnly(ChangeVRev))
+	http.HandleFunc("/vol/ch", PostOnly(VolHelp))
+	http.HandleFunc("/inv/nh", PostOnly(InvHelp))
+	http.HandleFunc("/findhelp", PostOnly(FHelp))
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -336,4 +336,28 @@ func FHelp(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	w.Write(js)
+}
+
+type handler func(w http.ResponseWriter, r *http.Request)
+
+func PostOnly(h handler) handler {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			h(w, r)
+			return
+		}
+		http.Error(w, "post only", http.StatusMethodNotAllowed)
+	}
+}
+
+func GetOnly(h handler) handler {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			h(w, r)
+			return
+		}
+		http.Error(w, "get only", http.StatusMethodNotAllowed)
+	}
 }

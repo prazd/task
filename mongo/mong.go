@@ -124,7 +124,7 @@ func VHelp(number, lat, long string) bool {
 	if len(findR.Name) == 0 {
 		return false
 	} else {
-		status := bson.M{"$set": bson.M{"canhelp": true, "geo": geo}}
+		status := bson.M{"$set": bson.M{"state": 1, "geo": geo}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
 			log.Println(err)
@@ -147,7 +147,7 @@ func IHelp(id, lat, long string) bool {
 	if len(findR.Name) == 0 {
 		return false
 	} else {
-		status := bson.M{"$set": bson.M{"needhelp": true, "geo": geo}}
+		status := bson.M{"$set": bson.M{"state": 1, "geo": geo}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
 			log.Println(err)
@@ -217,10 +217,9 @@ func GetGeoV() [][]string {
 	var result [][]string
 	for i, _ := range fGeo {
 		sl := fGeo[i].Geo[:]
-		sl = append(sl, strconv.FormatBool(fGeo[i].CanHelp))
+		sl = append(sl, strconv.Itoa(fGeo[i].State), fGeo[i].Name, fGeo[i].Number)
 		result = append(result, sl)
 	}
-
 	return result
 }
 
@@ -242,7 +241,7 @@ func GetGeoI() [][]string {
 	var result [][]string
 	for i, _ := range fGeo {
 		sl := fGeo[i].Geo[:]
-		sl = append(sl, strconv.FormatBool(fGeo[i].NeedHelp))
+		sl = append(sl, strconv.Itoa(fGeo[i].State), fGeo[i].Name, fGeo[i].Number)
 		result = append(result, sl)
 	}
 
@@ -320,7 +319,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 	if len(vol.Number) == 0 {
 		return "bad", "not found", "..."
 	} else {
-		vBusy := bson.M{"$set": bson.M{"busy": true}}
+		vBusy := bson.M{"$set": bson.M{"state": 2}}
 		err = volc.Update(vColQuierier, vBusy)
 		if err != nil {
 			log.Println(err)
@@ -337,7 +336,7 @@ func FindHelp(invId, volNumber string) (string, string, string) {
 	if len(inv.Name) == 0 {
 		return "bad", "...", "not found"
 	} else {
-		iBusy := bson.M{"$set": bson.M{"busy": true}}
+		iBusy := bson.M{"$set": bson.M{"state": 2}}
 		err = invc.Update(iColQuierier, iBusy)
 		if err != nil {
 			log.Println(err)

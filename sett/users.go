@@ -6,17 +6,19 @@ type InvUser struct {
 	Number   string
 	Geo      [2]string // ["latitude","longitude"]
 	Password string
-	NeedHelp bool
-	Busy     bool
+	// NeedHelp bool
+	// Busy     bool
+	State int
 }
 
 type VolUser struct {
-	Name        string
-	Number      string
-	Geo         [2]string
-	Password    string
-	CanHelp     bool
+	Name     string
+	Number   string
+	Geo      [2]string
+	Password string
+	// CanHelp     bool
 	GoodReviews int
 	BadReviews  int
-	Busy        bool
+	// Busy        bool
+	State int
 }
