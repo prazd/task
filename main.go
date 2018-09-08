@@ -27,7 +27,7 @@ func main() {
 	http.HandleFunc("/vol/ch", PostOnly(VolHelp))
 	http.HandleFunc("/inv/nh", PostOnly(InvHelp))
 	http.HandleFunc("/findhelp", PostOnly(FHelp))
-
+	http.HandleFunc("/vol/gp", PostOnly(VolGP))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
@@ -42,7 +42,7 @@ func InvSignUp(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	up := mongo.InvSup(inv.Id, inv.Name, inv.Number, inv.Password)
+	up := mongo.InvSup(inv.Id, inv.Name, inv.Phone, inv.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
@@ -65,13 +65,13 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	sIn, name, number := mongo.InvSin(inv.Id, inv.Password)
+	sIn, name, phone := mongo.InvSin(inv.Id, inv.Password)
 
 	resp := struct {
-		Resp   string `json:"resp"`
-		Name   string `json:"name"`
-		Number string `json:"number"`
-	}{sIn, name, number}
+		Resp  string `json:"resp"`
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+	}{sIn, name, phone}
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
@@ -92,7 +92,7 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	up := mongo.VolSup(vol.Name, vol.Number, vol.Password)
+	up := mongo.VolSup(vol.Name, vol.Phone, vol.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
@@ -116,7 +116,7 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	sIn, name := mongo.VolSin(vol.Number, vol.Password)
+	sIn, name := mongo.VolSin(vol.Phone, vol.Password)
 
 	resp := struct {
 		Resp string `json:"resp"`
@@ -138,7 +138,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type canHelp struct {
-		Number    string
+		Phone     string
 		Longitude string
 		Latitude  string
 	}
@@ -150,7 +150,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	help := mongo.VHelp(ch.Number, ch.Latitude, ch.Longitude)
+	help := mongo.VHelp(ch.Phone, ch.Latitude, ch.Longitude)
 	resp := struct {
 		Resp string `json:"resp"`
 	}{strconv.FormatBool(help)}
@@ -205,7 +205,7 @@ func VolExit(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	help := mongo.VolEx(vol.Number)
+	help := mongo.VolEx(vol.Phone)
 	resp := struct {
 		Resp string `json:"resp"`
 	}{strconv.FormatBool(help)}
@@ -277,7 +277,7 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	good, bad := mongo.GetVolReviews(vol.Number)
+	good, bad := mongo.GetVolReviews(vol.Phone)
 
 	resp := struct {
 		Good int `json:"goodrev"`
@@ -298,7 +298,7 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Req struct {
-		Number string `json:"number"`
+		Phone  string `json:"phone"`
 		Review string `json:"review"`
 	}
 	var req Req
@@ -306,7 +306,7 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	rev := mongo.ChangeVReview(req.Number, req.Review)
+	rev := mongo.ChangeVReview(req.Phone, req.Review)
 	js, excp := json.Marshal(bson.M{"resp": rev})
 	if excp != nil {
 		log.Println(err)
@@ -321,19 +321,51 @@ func FHelp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Help struct {
-		Id     string
-		Number string
+		Id    string
+		Phone string
 	}
 	var help Help
 	err = json.Unmarshal(body, &help)
 	if err != nil {
 		log.Println(err)
 	}
-	resp, rVol, rInv := mongo.FindHelp(help.Id, help.Number)
+	resp, rVol, rInv := mongo.FindHelp(help.Id, help.Phone)
 
 	js, exc := json.Marshal(bson.M{"resp": resp, "inv": rInv, "vol": rVol})
 	if exc != nil {
 		log.Println(err)
+	}
+	w.Write(js)
+}
+
+// GP
+func VolGP(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+
+	type canHelp struct {
+		Phone     string
+		Longitude string
+		Latitude  string
+	}
+
+	var ch canHelp
+
+	err = json.Unmarshal(body, &ch)
+	if err != nil {
+		log.Println(err)
+	}
+
+	help := mongo.VGP(ch.Phone, ch.Latitude, ch.Longitude)
+	resp := struct {
+		Resp string `json:"resp"`
+	}{strconv.FormatBool(help)}
+
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Println(bad)
 	}
 	w.Write(js)
 }

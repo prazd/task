@@ -3,7 +3,7 @@ package sett
 type InvUser struct {
 	Id       string
 	Name     string
-	Number   string
+	Phone    string
 	Geo      [2]string // ["latitude","longitude"]
 	Password string
 	// NeedHelp bool
@@ -13,7 +13,7 @@ type InvUser struct {
 
 type VolUser struct {
 	Name     string
-	Number   string
+	Phone    string
 	Geo      [2]string
 	Password string
 	// CanHelp     bool
