@@ -14,20 +14,23 @@ import (
 
 func main() {
 
-	http.HandleFunc("/inv/up", PostOnly(InvSignUp))
-	http.HandleFunc("/inv/in", PostOnly(InvSignIn))
-	http.HandleFunc("/vol/up", PostOnly(VolSignUp))
-	http.HandleFunc("/vol/in", PostOnly(VolSignIn))
-	http.HandleFunc("/vol/ex", PostOnly(VolExit))
-	http.HandleFunc("/inv/ex", PostOnly(InvExit))
-	http.HandleFunc("/vol/geolist", GetOnly(VGeoList))
-	http.HandleFunc("/inv/geolist", GetOnly(IGeoList))
-	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))
-	http.HandleFunc("/vol/chrev", PostOnly(ChangeVRev))
-	http.HandleFunc("/vol/ch", PostOnly(VolHelp))
-	http.HandleFunc("/inv/nh", PostOnly(InvHelp))
-	http.HandleFunc("/findhelp", PostOnly(FHelp))
-	http.HandleFunc("/vol/gp", PostOnly(VolGP))
+	http.HandleFunc("/inv/up", PostOnly(InvSignUp))     // Sign up (inv)
+	http.HandleFunc("/inv/in", PostOnly(InvSignIn))     // Sign in (inv), get inv info
+	http.HandleFunc("/vol/up", PostOnly(VolSignUp))     // Sign up (vol)
+	http.HandleFunc("/vol/in", PostOnly(VolSignIn))     // Sign in (vol), get vol info
+	http.HandleFunc("/vol/ex", PostOnly(VolExit))       // Exit (vol)
+	http.HandleFunc("/inv/ex", PostOnly(InvExit))       // Exit (inv)
+	http.HandleFunc("/vol/geolist", GetOnly(VGeoList))  // Get geolocation and user info (vol)
+	http.HandleFunc("/inv/geolist", GetOnly(IGeoList))  // Get geolocation and user info (inb)
+	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))   // Get reviews about vol
+	http.HandleFunc("/vol/chrev", PostOnly(ChangeVRev)) // evaluate vol
+	http.HandleFunc("/vol/ch", PostOnly(VolHelp))       // (Vol) canHelp - set state(1) and geolocation
+	http.HandleFunc("/inv/nh", PostOnly(InvHelp))       // (Inv) needHelp - set state(1) and geolocation
+	http.HandleFunc("/findhelp", PostOnly(FHelp))       // ...
+	http.HandleFunc("/vol/gp", PostOnly(VolGP))         // Set Vol(geo)
+	http.HandleFunc("/vol/help", PostOnly(VolHelpInv))  // Set state(2) vol and in, get vol info
+	http.HandleFunc("/inv/stophelp", PostOnly(IStop))   // Set vol and inv state(0)
+
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
@@ -184,7 +187,7 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 	help := mongo.IHelp(nh.Id, nh.Latitude, nh.Longitude)
 	resp := struct {
 		Resp string `json:"resp"`
-	}{strconv.FormatBool(help)}
+	}{strconv.Itoa(help)}
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
@@ -298,6 +301,7 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Req struct {
+		ID     string `json:"id"`
 		Phone  string `json:"phone"`
 		Review string `json:"review"`
 	}
@@ -306,7 +310,7 @@ func ChangeVRev(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	rev := mongo.ChangeVReview(req.Phone, req.Review)
+	rev := mongo.ChangeVReview(req.ID, req.Phone, req.Review)
 	js, excp := json.Marshal(bson.M{"resp": rev})
 	if excp != nil {
 		log.Println(err)
@@ -345,13 +349,13 @@ func VolGP(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	type canHelp struct {
+	type setGeo struct {
 		Phone     string
 		Longitude string
 		Latitude  string
 	}
 
-	var ch canHelp
+	var ch setGeo
 
 	err = json.Unmarshal(body, &ch)
 	if err != nil {
@@ -370,10 +374,63 @@ func VolGP(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func VolHelpInv(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	// var InvID string
+	type Help struct {
+		Id    string `json:"id"`
+		Phone string `json:"phone"`
+	}
+
+	var getH Help
+	err = json.Unmarshal(body, &getH)
+	if err != nil {
+		log.Println(err)
+	}
+	name, phone, geo := mongo.VolGetInv(getH.Phone, getH.Id)
+
+	resp := struct {
+		Name  string    `json:"name"`
+		Phone string    `json:"phone"`
+		Geo   [2]string `json:"geo"`
+	}{name, phone, geo}
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Println(err)
+	}
+	w.Write(js)
+}
+
+func IStop(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+
+	type StopHelp struct {
+		Id    string `json:"id"`
+		Phone string `json:"phone"`
+	}
+
+	var stop StopHelp
+	err = json.Unmarshal(body, &stop)
+	if err != nil {
+		log.Println(err)
+	}
+	sh := mongo.InvStopHelp(stop.Id, stop.Phone)
+	js, bad := json.Marshal(strconv.FormatBool(sh))
+	if bad != nil {
+		log.Println(err)
+	}
+	w.Write(js)
+}
+
 type handler func(w http.ResponseWriter, r *http.Request)
 
 func PostOnly(h handler) handler {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			h(w, r)
@@ -384,7 +441,6 @@ func PostOnly(h handler) handler {
 }
 
 func GetOnly(h handler) handler {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			h(w, r)

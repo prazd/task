@@ -1,24 +1,23 @@
 package sett
 
 type InvUser struct {
-	Id       string
-	Name     string
-	Phone    string
-	Geo      [2]string // ["latitude","longitude"]
-	Password string
-	// NeedHelp bool
-	// Busy     bool
-	State int
+	Id       string    `json:"id"`
+	Name     string    `json:"name"`
+	Phone    string    `json:"phone"`
+	Geo      [2]string `json:"geo"`
+	Password string    `json:"password"`
+	State    int       `json:"state"`
+	ConID    int       `json:"conid"`
+	Online   bool      `json:"online"`
 }
 
 type VolUser struct {
-	Name     string
-	Phone    string
-	Geo      [2]string
-	Password string
-	// CanHelp     bool
-	GoodReviews int
-	BadReviews  int
-	// Busy        bool
-	State int
+	Name        string    `json:"name"`
+	Phone       string    `json:"phone"`
+	Geo         [2]string `json:"geo"`
+	Password    string    `json:"password"`
+	GoodReviews int       `json:"goodreviews"`
+	BadReviews  int       `json:"badreviews"`
+	State       int       `json:"state"`
+	Online      bool      `json:"online"`
 }

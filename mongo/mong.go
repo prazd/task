@@ -39,11 +39,17 @@ func InvSin(id, password string) (string, string, string) {
 	}
 
 	checkPass := comparePasswords(findR.Password, []byte(password))
-	if checkPass != true {
+	if checkPass == false {
 		return "bad pass", "", ""
+	} else {
+		online := bson.M{"$set": bson.M{"online": true}}
+		err = c.Update(colQuierier, online)
+		if err != nil {
+			log.Println(err)
+		}
+		return "signIn", findR.Name, findR.Phone
 	}
 
-	return "signIn", findR.Name, findR.Phone
 }
 
 func InvSup(id, name, phone, password string) string {
@@ -88,14 +94,19 @@ func VolSin(phone, password string) (string, string) {
 	var findR s.VolUser
 	c.Find(colQuierier).One(&findR)
 	if len(findR.Phone) == 0 {
-		return "not in db", ""
+		return "", "not in db"
 	}
 	checkPass := comparePasswords(findR.Password, []byte(password))
-	if checkPass != true {
-		return "bad pass", ""
+	if checkPass == false {
+		return "", "bad pass"
+	} else {
+		online := bson.M{"$set": bson.M{"online": true}}
+		err = c.Update(colQuierier, online)
+		if err != nil {
+			log.Println(err)
+		}
+		return "signIn", findR.Name
 	}
-
-	return "signIn", findR.Name
 }
 
 func VolSup(name, phone, password string) string {
@@ -140,6 +151,8 @@ func VHelp(phone, lat, long string) bool {
 
 	if len(findR.Name) == 0 {
 		return false
+	} else if findR.Online == false {
+		return false
 	} else {
 		status := bson.M{"$set": bson.M{"state": 1, "geo": geo}}
 		err = c.Update(colQuierier, status)
@@ -166,6 +179,8 @@ func VGP(phone, lat, long string) bool {
 
 	if len(findR.Name) == 0 {
 		return false
+	} else if findR.Online == false {
+		return false
 	} else {
 		status := bson.M{"$set": bson.M{"geo": geo}}
 		err = c.Update(colQuierier, status)
@@ -176,26 +191,34 @@ func VGP(phone, lat, long string) bool {
 	}
 }
 
-func IHelp(id, lat, long string) bool {
+func IHelp(id, lat, long string) int {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.Println(err)
 	}
 	defer session.Close()
+
 	c := session.DB(IDBNAME).C(ICOL)
 	var findR s.InvUser
+	var readyInv []s.InvUser
+
+	c.Find(bson.M{"state": 1}).All(&readyInv)
+	conID := len(readyInv) + 1
 	colQuierier := bson.M{"id": id}
 	c.Find(colQuierier).One(&findR)
 	geo := [2]string{lat, long}
+
 	if len(findR.Name) == 0 {
-		return false
+		return -1
+	} else if findR.Online == false {
+		return -1
 	} else {
-		status := bson.M{"$set": bson.M{"state": 1, "geo": geo}}
+		status := bson.M{"$set": bson.M{"state": 1, "geo": geo, "conid": conID}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
 			log.Println(err)
 		}
-		return true
+		return conID
 	}
 }
 
@@ -212,7 +235,7 @@ func VolEx(phone string) bool {
 	if len(findR.Name) == 0 {
 		return false
 	} else {
-		status := bson.M{"$set": bson.M{"canhelp": false, "state": 0}}
+		status := bson.M{"$set": bson.M{"canhelp": false, "state": 0, "conid": -1, "online": false}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
 			log.Println(err)
@@ -234,7 +257,7 @@ func InvEx(id string) bool {
 	if len(findR.Id) == 0 {
 		return false
 	} else {
-		status := bson.M{"$set": bson.M{"needhelp": false, "state": 0}}
+		status := bson.M{"$set": bson.M{"needhelp": false, "state": 0, "conid": 0, "online": false}}
 		err = c.Update(colQuierier, status)
 		if err != nil {
 			log.Println(err)
@@ -307,14 +330,16 @@ func GetVolReviews(phone string) (int, int) {
 	return vol.GoodReviews, vol.BadReviews
 }
 
-func ChangeVReview(phone, review string) bool {
+func ChangeVReview(id, phone, review string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.Println(err)
 	}
 	defer session.Close()
 	c := session.DB(VDBNAME).C(VCOL)
+	// i := session.DB(VDBNAME).C(VCOL)
 	var vol s.VolUser
+
 	colQuierier := bson.M{"phone": phone}
 	err = c.Find(colQuierier).One(&vol)
 	if err != nil {
@@ -386,6 +411,87 @@ func FindHelp(invId, volPhone string) (string, string, string) {
 		}
 	}
 	return "nice", "busy", "busy"
+}
+
+func VolGetInv(phone, id string) (string, string, [2]string) {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	// Check vol login
+	var vol s.VolUser
+	v := session.DB(VDBNAME).C(VCOL)
+	v.Find(bson.M{"phone": phone}).One(&vol)
+	checkVol := VolCheck(&vol)
+	if checkVol == false {
+		return "", "not login", [2]string{"", ""}
+	}
+	c := session.DB(IDBNAME).C(ICOL)
+	var inv s.InvUser
+	invId, err := strconv.Atoi(id)
+	if err != nil {
+		log.Println()
+		return "", "bad id", [2]string{"", ""}
+	}
+	err = c.Find(bson.M{"conid": invId}).One(&inv)
+	if err != nil {
+		log.Println(err)
+	}
+	if len(inv.Name) == 0 {
+		return "user not found", "", [2]string{"", ""}
+	} else {
+		state := bson.M{"$set": bson.M{"state": 2}}
+		err = c.Update(bson.M{"phone": phone}, state)
+		if err != nil {
+			log.Println(err)
+		}
+		err = v.Update(bson.M{"conid": id}, state)
+		if err != nil {
+			log.Println(err)
+		}
+		return inv.Name, inv.Phone, inv.Geo
+	}
+}
+
+func InvStopHelp(id, phone string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	var vol s.VolUser
+	var inv s.InvUser
+
+	v := session.DB(VDBNAME).C(VCOL)
+	i := session.DB(IDBNAME).C(ICOL)
+
+	err = v.Find(bson.M{"phone": phone}).One(&vol)
+	if err != nil {
+		log.Println(err)
+	}
+	err = i.Find(bson.M{"id": id}).One(&inv)
+
+	if len(vol.Name) == 0 || len(inv.Name) == 0 {
+		return false
+	} else if vol.Online == false || inv.Online == false {
+		return false
+	} else if vol.State != 2 || inv.State != 2 {
+		return false
+	} else {
+		stop := bson.M{"$set": bson.M{"state": 0}}
+		v.Update(bson.M{"phone": phone}, stop)
+		i.Update(bson.M{"id": id}, stop)
+		return true
+	}
+}
+
+func VolCheck(vol *s.VolUser) bool {
+	if vol.State == 0 {
+		return false
+	} else {
+		return true
+	}
 }
 
 func hashAndSalt(pwd []byte) string {
