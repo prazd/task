@@ -119,12 +119,13 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	sIn, name := mongo.VolSin(vol.Phone, vol.Password)
+	sIn, name, phone := mongo.VolSin(vol.Phone, vol.Password)
 
 	resp := struct {
-		Resp string `json:"resp"`
-		Name string `json:"name"`
-	}{sIn, name}
+		Resp  string `json:"resp"`
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+	}{sIn, name, phone}
 
 	js, bad := json.Marshal(resp)
 	if bad != nil {
@@ -381,7 +382,7 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 	}
 	// var InvID string
 	type Help struct {
-		Id    string `json:"id"`
+		Conid string `json:"conid"`
 		Phone string `json:"phone"`
 	}
 
@@ -390,7 +391,7 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	name, phone, geo := mongo.VolGetInv(getH.Phone, getH.Id)
+	name, phone, geo := mongo.VolGetInv(getH.Phone, getH.Conid)
 
 	resp := struct {
 		Name  string    `json:"name"`
@@ -411,7 +412,7 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type StopHelp struct {
-		Id    string `json:"id"`
+		Conid string `json:"conid"`
 		Phone string `json:"phone"`
 	}
 
@@ -420,7 +421,7 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	sh := mongo.InvStopHelp(stop.Id, stop.Phone)
+	sh := mongo.InvStopHelp(stop.Conid, stop.Phone)
 	js, bad := json.Marshal(strconv.FormatBool(sh))
 	if bad != nil {
 		log.Println(err)
