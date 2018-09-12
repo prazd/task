@@ -94,11 +94,11 @@ func VolSin(phone, password string) (string, string, string) {
 	var findR s.VolUser
 	c.Find(colQuierier).One(&findR)
 	if len(findR.Phone) == 0 {
-		return "", "", "not in db"
+		return "not in db", "", ""
 	}
 	checkPass := comparePasswords(findR.Password, []byte(password))
 	if checkPass == false {
-		return "", "", "bad pass"
+		return "bad pass", "", ""
 	} else {
 		online := bson.M{"$set": bson.M{"online": true}}
 		err = c.Update(colQuierier, online)

@@ -127,12 +127,19 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 		Phone string `json:"phone"`
 	}{sIn, name, phone}
 
-	js, bad := json.Marshal(resp)
-	if bad != nil {
-		log.Println(bad)
+	if len(name) == 0 && len(phone) == 0 {
+		js, err := json.Marshal(resp.Resp)
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
+	} else {
+		js, bad := json.Marshal(resp)
+		if bad != nil {
+			log.Println(bad)
+		}
+		w.Write(js)
 	}
-	w.Write(js)
-
 }
 
 func VolHelp(w http.ResponseWriter, r *http.Request) {
