@@ -76,9 +76,9 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 		Phone string `json:"phone"`
 	}{sIn, name, phone}
 
-	js, bad := json.Marshal(resp)
-	if bad != nil {
-		log.Println(bad)
+	js, err := json.Marshal(resp)
+	if err != nil {
+		log.Println(err)
 	}
 	w.Write(js)
 }
@@ -127,19 +127,12 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 		Phone string `json:"phone"`
 	}{sIn, name, phone}
 
-	if len(name) == 0 && len(phone) == 0 {
-		js, err := json.Marshal(resp.Resp)
-		if err != nil {
-			log.Println(err)
-		}
-		w.Write(js)
-	} else {
-		js, bad := json.Marshal(resp)
-		if bad != nil {
-			log.Println(bad)
-		}
-		w.Write(js)
+	js, err := json.Marshal(resp)
+	if err != nil {
+		log.Println(err)
 	}
+	w.Write(js)
+
 }
 
 func VolHelp(w http.ResponseWriter, r *http.Request) {
@@ -436,6 +429,7 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+// POST only && GET only
 type handler func(w http.ResponseWriter, r *http.Request)
 
 func PostOnly(h handler) handler {
