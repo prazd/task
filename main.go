@@ -70,17 +70,28 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	sIn, name, phone := mongo.InvSin(inv.Id, inv.Password)
 
-	resp := struct {
+	respFull := struct {
 		Resp  string `json:"resp"`
 		Name  string `json:"name"`
 		Phone string `json:"phone"`
 	}{sIn, name, phone}
-
-	js, err := json.Marshal(resp)
-	if err != nil {
-		log.Println(err)
+	respExcp := struct {
+		Resp string `json:"resp"`
+	}{sIn}
+	if len(name) == 0 && len(phone) == 0 {
+		js, err := json.Marshal(respExcp)
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
+	} else {
+		js, err := json.Marshal(respFull)
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
 	}
-	w.Write(js)
+
 }
 
 func VolSignUp(w http.ResponseWriter, r *http.Request) {
@@ -121,17 +132,28 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	sIn, name, phone := mongo.VolSin(vol.Phone, vol.Password)
 
-	resp := struct {
+	respFull := struct {
 		Resp  string `json:"resp"`
 		Name  string `json:"name"`
 		Phone string `json:"phone"`
 	}{sIn, name, phone}
 
-	js, err := json.Marshal(resp)
-	if err != nil {
-		log.Println(err)
+	respExcp := struct {
+		Resp string `json:"resp"`
+	}{sIn}
+	if len(name) == 0 && len(phone) == 0 {
+		js, err := json.Marshal(respExcp)
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
+	} else {
+		js, err := json.Marshal(respFull)
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
 	}
-	w.Write(js)
 
 }
 
