@@ -413,7 +413,7 @@ func FindHelp(invId, volPhone string) (string, string, string) {
 	return "nice", "busy", "busy"
 }
 
-func VolGetInv(phone, conid string) (string, string, [2]string) {
+func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.Println(err)
@@ -424,11 +424,11 @@ func VolGetInv(phone, conid string) (string, string, [2]string) {
 	v := session.DB(VDBNAME).C(VCOL)
 	v.Find(bson.M{"phone": phone}).One(&vol)
 	if len(vol.Name) == 0 {
-		return "vol not found", "", [2]string{"", ""}
+		return "vol not found", "", "", [2]string{"", ""}
 	}
 	checkVol := VolCheck(&vol)
 	if checkVol == false {
-		return "", "vol not ready", [2]string{"", ""}
+		return "vol not ready", "", "", [2]string{"", ""}
 	}
 
 	i := session.DB(IDBNAME).C(ICOL)
@@ -436,30 +436,30 @@ func VolGetInv(phone, conid string) (string, string, [2]string) {
 	invId, err := strconv.Atoi(conid)
 	if err != nil {
 		log.Println()
-		return "bad conid", "", [2]string{"", ""}
+		return "bad conid", "", "", [2]string{"", ""}
 	}
 	err = i.Find(bson.M{"conid": invId}).One(&inv)
 	if err != nil {
 		log.Println(err)
-		return "bad inv find", "", [2]string{"", ""}
+		return "bad inv find", "", "", [2]string{"", ""}
 	}
 	if len(inv.Name) == 0 {
-		return "user not found", "", [2]string{"", ""}
+		return "user not found", "", "", [2]string{"", ""}
 	} else {
 
 		state := bson.M{"$set": bson.M{"state": 2}}
 		err = i.Update(bson.M{"conid": invId}, state)
 		if err != nil {
 			log.Println(err)
-			return "bad inv set", "", [2]string{"", ""}
+			return "bad inv set", "", "", [2]string{"", ""}
 		}
 		err = v.Update(bson.M{"phone": phone}, state)
 
 		if err != nil {
 			log.Println(err)
-			return "bad vol set", "", [2]string{"", ""}
+			return "bad vol set", "", "", [2]string{"", ""}
 		}
-		return inv.Name, inv.Phone, inv.Geo
+		return "nice", inv.Name, inv.Phone, inv.Geo
 	}
 }
 

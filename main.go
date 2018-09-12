@@ -413,18 +413,33 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	name, phone, geo := mongo.VolGetInv(getH.Phone, getH.Conid)
+	info, name, phone, geo := mongo.VolGetInv(getH.Phone, getH.Conid)
+
+	respEx := struct {
+		Resp string `json:"resp"`
+	}{info}
 
 	resp := struct {
+		Resp  string    `json:"resp"`
 		Name  string    `json:"name"`
 		Phone string    `json:"phone"`
 		Geo   [2]string `json:"geo"`
-	}{name, phone, geo}
-	js, bad := json.Marshal(resp)
-	if bad != nil {
-		log.Println(err)
+	}{info, name, phone, geo}
+
+	if len(name) == 0 {
+		js, bad := json.Marshal(respEx)
+		if bad != nil {
+			log.Println(err)
+		}
+		w.Write(js)
+	} else {
+		js, bad := json.Marshal(resp)
+		if bad != nil {
+			log.Println(err)
+		}
+		w.Write(js)
 	}
-	w.Write(js)
+
 }
 
 func IStop(w http.ResponseWriter, r *http.Request) {
@@ -444,7 +459,7 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	sh := mongo.InvStopHelp(stop.Conid, stop.Phone)
-	js, bad := json.Marshal(strconv.FormatBool(sh))
+	js, bad := json.Marshal(bson.M{"resp": strconv.FormatBool(sh)})
 	if bad != nil {
 		log.Println(err)
 	}
