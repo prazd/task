@@ -27,7 +27,8 @@ func main() {
 	http.HandleFunc("/vol/ch", PostOnly(VolHelp))       // (Vol) canHelp - set state(1) and geolocation
 	http.HandleFunc("/inv/nh", PostOnly(InvHelp))       // (Inv) needHelp - set state(1) and geolocation
 	http.HandleFunc("/findhelp", PostOnly(FHelp))       // ...
-	http.HandleFunc("/vol/gp", PostOnly(VolGP))         // Set Vol(geo)
+	http.HandleFunc("/vol/gp", PostOnly(VolGP))         // Set Vol geo
+	http.HandleFunc("/inv/gp", PostOnly(InvGP))         // Set Inv geo
 	http.HandleFunc("/vol/help", PostOnly(VolHelpInv))  // Set state(2) vol and in, get vol info
 	http.HandleFunc("/inv/stophelp", PostOnly(IStop))   // Set vol and inv state(0)
 
@@ -396,6 +397,39 @@ func VolGP(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(js)
 }
+
+func InvGP(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+
+	type setGeo struct {
+		Id        string `json:"id"`
+		Longitude string `json:"longitude"`
+		Latitude  string `json:"latitude"`
+	}
+
+	var ch setGeo
+
+	err = json.Unmarshal(body, &ch)
+	if err != nil {
+		log.Println(err)
+	}
+
+	help := mongo.IGP(ch.Id, ch.Latitude, ch.Longitude)
+	resp := struct {
+		Resp string `json:"resp"`
+	}{strconv.FormatBool(help)}
+
+	js, bad := json.Marshal(resp)
+	if bad != nil {
+		log.Println(bad)
+	}
+	w.Write(js)
+}
+
+//
 
 func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)

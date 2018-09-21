@@ -191,6 +191,34 @@ func VGP(phone, lat, long string) bool {
 	}
 }
 
+func IGP(id, lat, long string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	c := session.DB(IDBNAME).C(ICOL)
+	var findR s.InvUser
+	colQuierier := bson.M{"id": id}
+	c.Find(colQuierier).One(&findR)
+	geo := [2]string{lat, long}
+
+	if len(findR.Name) == 0 {
+		return false
+	} else if findR.Online == false {
+		return false
+	} else {
+		status := bson.M{"$set": bson.M{"geo": geo}}
+		err = c.Update(colQuierier, status)
+		if err != nil {
+			log.Println(err)
+		}
+		return true
+	}
+}
+
+//
+
 func IHelp(id, lat, long string) int {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
