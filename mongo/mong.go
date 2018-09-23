@@ -42,7 +42,7 @@ func InvSin(id, password string) (string, string, string) {
 	if checkPass == false {
 		return "bad pass", "", ""
 	} else {
-		online := bson.M{"$set": bson.M{"online": true}}
+		online := bson.M{"$set": bson.M{"online": true, "state": 0}}
 		err = c.Update(colQuierier, online)
 		if err != nil {
 			log.Println(err)
@@ -100,7 +100,7 @@ func VolSin(phone, password string) (string, string, string) {
 	if checkPass == false {
 		return "bad pass", "", ""
 	} else {
-		online := bson.M{"$set": bson.M{"online": true}}
+		online := bson.M{"$set": bson.M{"online": true, "state": 0}}
 		err = c.Update(colQuierier, online)
 		if err != nil {
 			log.Println(err)
