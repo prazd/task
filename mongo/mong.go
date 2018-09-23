@@ -240,6 +240,8 @@ func IHelp(id, lat, long string) int {
 		return -1
 	} else if findR.Online == false {
 		return -1
+	} else if findR.State == 1 {
+		return -1
 	} else {
 		status := bson.M{"$set": bson.M{"state": 1, "geo": geo, "conid": conID}}
 		err = c.Update(colQuierier, status)
@@ -395,52 +397,6 @@ func ChangeVReview(id, phone, review string) bool {
 	return true
 }
 
-func FindHelp(invId, volPhone string) (string, string, string) {
-	session, err := mgo.Dial(CONN)
-	if err != nil {
-		log.Println(err)
-	}
-	defer session.Close()
-
-	volc := session.DB(VDBNAME).C(VCOL)
-	invc := session.DB(IDBNAME).C(ICOL)
-
-	// Vol Busy
-	var vol s.VolUser
-	vColQuierier := bson.M{"phone": volPhone}
-	err = volc.Find(vColQuierier).One(&vol)
-	if err != nil {
-		log.Println(err)
-	}
-	if len(vol.Phone) == 0 {
-		return "bad", "not found", "..."
-	} else {
-		vBusy := bson.M{"$set": bson.M{"state": 2}}
-		err = volc.Update(vColQuierier, vBusy)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-
-	// Inv Busy
-	var inv s.InvUser
-	iColQuierier := bson.M{"id": invId}
-	err = invc.Find(iColQuierier).One(&inv)
-	if err != nil {
-		log.Println(err)
-	}
-	if len(inv.Name) == 0 {
-		return "bad", "...", "not found"
-	} else {
-		iBusy := bson.M{"$set": bson.M{"state": 2}}
-		err = invc.Update(iColQuierier, iBusy)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-	return "nice", "busy", "busy"
-}
-
 func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
@@ -473,15 +429,18 @@ func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	}
 	if len(inv.Name) == 0 {
 		return "user not found", "", "", [2]string{"", ""}
-	} else {
 
-		state := bson.M{"$set": bson.M{"state": 2}}
-		err = i.Update(bson.M{"conid": invId}, state)
+	} else if len(inv.Helper) != 0 || len(vol.InTrouble) != 0 {
+		return "busy", "", "", [2]string{"", ""}
+	} else {
+		iStateAndHelper := bson.M{"$set": bson.M{"state": 2, "helper": phone}}
+		vStateAndInTrouble := bson.M{"$set": bson.M{"state": 2, "introuble": inv.Id}}
+		err = i.Update(bson.M{"conid": invId}, iStateAndHelper)
 		if err != nil {
 			log.Println(err)
 			return "bad inv set", "", "", [2]string{"", ""}
 		}
-		err = v.Update(bson.M{"phone": phone}, state)
+		err = v.Update(bson.M{"phone": phone}, vStateAndInTrouble)
 
 		if err != nil {
 			log.Println(err)
@@ -526,14 +485,128 @@ func InvStopHelp(conid, phone string) bool {
 		log.Println(vol.State, inv.State)
 		return false
 	} else {
-		stop := bson.M{"$set": bson.M{"state": 0}}
+		stop := bson.M{"$set": bson.M{"state": 0, "introuble": ""}}
 
-		istop := bson.M{"$set": bson.M{"state": 0, "conid": 0}}
+		istop := bson.M{"$set": bson.M{"state": 0, "conid": 0, "helper": ""}}
 
 		v.Update(bson.M{"phone": phone}, stop)
 		i.Update(bson.M{"conid": invId}, istop)
 
 		return true
+	}
+}
+
+// Get helper for inv
+func Helper(id string) (string, s.VolUser) {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	var inv s.InvUser
+	var vol s.VolUser
+
+	i := session.DB(IDBNAME).C(ICOL)
+	v := session.DB(VDBNAME).C(VCOL)
+
+	err = i.Find(bson.M{"id": id}).One(&inv)
+	if err != nil {
+		log.Println(err)
+	}
+	if len(inv.Helper) == 0 || inv.State != 2 {
+		return "false", vol
+	} else {
+		err = v.Find(bson.M{"phone": inv.Helper}).One(&vol)
+		if err != nil {
+			log.Println(err)
+		}
+		if len(vol.Name) == 0 {
+			return "false", vol
+		} else {
+			return "true", vol
+		}
+	}
+
+}
+
+// If ren vol :
+func VolStop(phone string) bool {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	var inv s.InvUser
+	var vol s.VolUser
+
+	i := session.DB(IDBNAME).C(ICOL)
+	v := session.DB(VDBNAME).C(VCOL)
+
+	err = v.Find(bson.M{"phone": phone}).One(&vol)
+	if err != nil {
+		log.Println(err)
+	}
+	if len(vol.Name) == 0 {
+		return false
+	} else if len(vol.InTrouble) == 0 {
+		return false
+	} else if vol.Online == false {
+		return false
+	} else {
+		err = i.Find(bson.M{"id": vol.InTrouble}).One(&inv)
+		if err != nil {
+			log.Println(err)
+		}
+		volInfo := bson.M{"$set": bson.M{"state": 1, "introuble": ""}}
+		invInfo := bson.M{"$set": bson.M{"state": 1, "helper": ""}}
+		err = v.Update(bson.M{"phone": phone}, volInfo)
+		if err != nil {
+			log.Println(err)
+		}
+		err = i.Update(bson.M{"id": inv.Id}, invInfo)
+		if err != nil {
+			log.Println(err)
+		}
+		return true
+	}
+
+}
+
+func HGeo(id string) (bool, [2]string) {
+	session, err := mgo.Dial(CONN)
+	if err != nil {
+		log.Println(err)
+	}
+	defer session.Close()
+	var inv s.InvUser
+	var vol s.VolUser
+
+	i := session.DB(IDBNAME).C(ICOL)
+	v := session.DB(VDBNAME).C(VCOL)
+
+	err = i.Find(bson.M{"id": id}).One(&inv)
+	if err != nil {
+		log.Println(err)
+	}
+	if len(inv.Name) == 0 {
+		return false, [2]string{"", ""}
+	} else if len(inv.Helper) == 0 {
+		return false, [2]string{"", ""}
+	} else if inv.Online == false {
+		return false, [2]string{"", ""}
+	} else {
+		err = v.Find(bson.M{"phone": inv.Helper}).One(&vol)
+		if err != nil {
+			log.Println(err)
+		}
+		if len(vol.Name) == 0 {
+			return false, [2]string{"", ""}
+		} else if len(vol.InTrouble) == 0 {
+			return false, [2]string{"", ""}
+		} else if vol.Online == false {
+			return false, [2]string{"", ""}
+		}
+		return true, vol.Geo
 	}
 }
 

@@ -9,6 +9,7 @@ type InvUser struct {
 	State    int       `json:"state"`
 	ConID    int       `json:"conid"`
 	Online   bool      `json:"online"`
+	Helper   string    `json:"helper"`
 }
 
 type VolUser struct {
@@ -20,4 +21,5 @@ type VolUser struct {
 	BadReviews  int       `json:"badreviews"`
 	State       int       `json:"state"`
 	Online      bool      `json:"online"`
+	InTrouble   string    `json:"introuble"`
 }
