@@ -775,21 +775,24 @@ func Systemctl(thing, service string) string {
 	var resp string
 	if err != nil {
 		log.Println(err)
-		if thing == "start" {
-			resp = "Not start !"
-		} else if thing == "stop" {
-			resp = "Not stopped !"
-		} else if thing == "restart" {
-			resp = "Not rebooted !"
+		switch thing {
+		case "start":
+			resp = "Not start!"
+		case "stop":
+			resp = "Not stopped!"
+		case "restart":
+			resp = "Not rebooted"
 		}
 	} else {
-		if thing == "start" {
+		switch thing {
+		case "start":
 			resp = "Started:✔"
-		} else if thing == "stop" {
+		case "stop":
 			resp = "Stopped:✖"
-		} else if thing == "restart" {
+		case "restart":
 			resp = "Rebooted:✔"
 		}
+
 	}
 	return resp
 }
