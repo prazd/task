@@ -429,6 +429,13 @@ func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	}
 	if len(inv.Name) == 0 {
 		return "user not found", "", "", [2]string{"", ""}
+	} else if inv.Helper == phone {
+		err = v.Update(bson.M{"phone": phone}, bson.M{"$set": bson.M{"state": 2, "introuble": inv.Id}})
+		if err != nil {
+			log.Println(err)
+			return "bad vol set", "", "", [2]string{"", ""}
+		}
+		return "vol recovery", inv.Name, inv.Phone, inv.Geo
 
 	} else if len(inv.Helper) != 0 || len(vol.InTrouble) != 0 {
 		return "busy", "", "", [2]string{"", ""}
