@@ -66,7 +66,7 @@ func InvSignUp(w http.ResponseWriter, r *http.Request) {
 
 	js, err := json.Marshal(resp)
 	if err != nil {
-		log.Println(bad)
+		log.Println(err)
 	}
 	w.Write(js)
 }
