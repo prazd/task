@@ -233,10 +233,12 @@ func IHelp(id, lat, long string) int {
 	var readyInv []s.InvUser
 
 	c.Find(bson.M{"state": 1}).All(&readyInv)
+
 	conID := len(readyInv) + 1
 	colQuierier := bson.M{"id": id}
 	c.Find(colQuierier).One(&findR)
 	geo := [2]string{lat, long}
+	var status bson.M
 
 	if len(findR.Name) == 0 {
 		return -1
@@ -245,7 +247,13 @@ func IHelp(id, lat, long string) int {
 	} else if findR.State == 1 {
 		return -1
 	} else {
-		status := bson.M{"$set": bson.M{"state": 1, "geo": geo, "conid": conID}}
+		switch findR.State {
+		case 2:
+			status = bson.M{"$set": bson.M{"geo": geo}}
+		case 0:
+			status = bson.M{"$set": bson.M{"state": 1, "geo": geo, "conid": conID}}
+		}
+
 		err = c.Update(colQuierier, status)
 		if err != nil {
 			log.Println(err)
