@@ -774,8 +774,8 @@ func main() {
 		b.Handle(&deploy, func(c *tb.Callback) {
 			info := make(chan string)
 			go func() {
-				path := os.Getenv("dscript")
-				dep := exec.Command("." + path)
+				// path := os.Getenv("dscript")
+				dep := exec.Command("../Pull.sh")
 				var stdout bytes.Buffer
 				dep.Stdout = &stdout
 				err := dep.Run()
