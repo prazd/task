@@ -31,7 +31,7 @@ func main() {
 	http.HandleFunc("/vol/renouncement", PostOnly(VolRen))   // If vol can't help, but put conid
 	http.HandleFunc("/inv/stophelp", PostOnly(IStop))        // Set vol and inv state(0)
 	http.HandleFunc("/inv/helperinfo", PostOnly(HelperInfo)) // on inv side get geo and info about helper
-	http.HandleFunc("/inv/volgeo", GetOnly(HelperGeo))       // get helper geo
+	http.HandleFunc("/inv/volgeo", PostOnly(HelperGeo))      // get helper geo
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -160,6 +160,7 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func VolHelp(w http.ResponseWriter, r *http.Request) {
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
