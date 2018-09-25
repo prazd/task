@@ -41,6 +41,8 @@ func InvSin(id, password string) (string, string, string) {
 	checkPass := comparePasswords(findR.Password, []byte(password))
 	if checkPass == false {
 		return "bad pass", "", ""
+	} else if findR.State == 2 {
+		return "comeback", findR.Name, findR.Phone
 	} else {
 		online := bson.M{"$set": bson.M{"online": true, "state": 0}}
 		err = c.Update(colQuierier, online)
@@ -499,6 +501,8 @@ func InvStopHelp(conid, phone, review string) bool {
 			vstop = bson.M{"$set": bson.M{"state": 0, "introuble": "", "badreviews": vol.BadReviews + 1}}
 		case "good":
 			vstop = bson.M{"$set": bson.M{"state": 0, "introuble": "", "goodreviews": vol.GoodReviews + 1}}
+		case "none":
+			vstop = bson.M{"$set": bson.M{"state": 0, "introuble": ""}}
 		}
 		istop := bson.M{"$set": bson.M{"state": 0, "conid": 0, "helper": ""}}
 
