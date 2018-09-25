@@ -33,6 +33,8 @@ func main() {
 	http.HandleFunc("/inv/stophelp", PostOnly(IStop))        // Set vol and inv state(0)
 	http.HandleFunc("/inv/helperinfo", PostOnly(HelperInfo)) // on inv side get geo and info about helper
 	http.HandleFunc("/inv/volgeo", GetOnly(HelperGeo))       // get helper geo
+
+	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
 func InvSignUp(w http.ResponseWriter, r *http.Request) {
