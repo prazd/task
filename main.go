@@ -32,9 +32,19 @@ func main() {
 	http.HandleFunc("/vol/renouncement", PostOnly(VolRen))   // If vol can't help, but put conid
 	http.HandleFunc("/inv/stophelp", PostOnly(IStop))        // Set vol and inv state(0)
 	http.HandleFunc("/inv/helperinfo", PostOnly(HelperInfo)) // on inv side get geo and info about helper
-	http.HandleFunc("/inv/volgeo", PostOnly(HelperGeo))      // get helper geo
+	http.HandleFunc("/inv/volgeo", GetOnly(HelperGeo))       // get helper geo
+
+	http.HandleFunc("/check", PostOnly(Check))
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+
+func Check(w http.ResponseWriter, r *http.Request) {
+	js, err := json.Marshal(bson.M{"resp": "check"})
+	if err != nil {
+		log.Println(err)
+	}
+	w.Write(js)
 }
 
 func InvSignUp(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +64,8 @@ func InvSignUp(w http.ResponseWriter, r *http.Request) {
 		Resp string `json:"resp"`
 	}{up}
 
-	js, bad := json.Marshal(resp)
-	if bad != nil {
+	js, err := json.Marshal(resp)
+	if err != nil {
 		log.Println(bad)
 	}
 	w.Write(js)
