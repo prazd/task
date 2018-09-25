@@ -14,16 +14,16 @@ import (
 
 func main() {
 
-	http.HandleFunc("/inv/up", PostOnly(InvSignUp))          // Sign up (inv)
-	http.HandleFunc("/inv/in", PostOnly(InvSignIn))          // Sign in (inv), get inv info
-	http.HandleFunc("/vol/up", PostOnly(VolSignUp))          // Sign up (vol)
-	http.HandleFunc("/vol/in", PostOnly(VolSignIn))          // Sign in (vol), get vol info
-	http.HandleFunc("/vol/ex", PostOnly(VolExit))            // Exit (vol)
-	http.HandleFunc("/inv/ex", PostOnly(InvExit))            // Exit (inv)
-	http.HandleFunc("/vol/geolist", GetOnly(VGeoList))       // Get geolocation and user info (vol)
-	http.HandleFunc("/inv/geolist", GetOnly(IGeoList))       // Get geolocation and user info (inb)
-	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))        // Get reviews about vol
-	http.HandleFunc("/vol/chrev", PostOnly(ChangeVRev))      // evaluate vol
+	http.HandleFunc("/inv/up", PostOnly(InvSignUp))    // Sign up (inv)
+	http.HandleFunc("/inv/in", PostOnly(InvSignIn))    // Sign in (inv), get inv info
+	http.HandleFunc("/vol/up", PostOnly(VolSignUp))    // Sign up (vol)
+	http.HandleFunc("/vol/in", PostOnly(VolSignIn))    // Sign in (vol), get vol info
+	http.HandleFunc("/vol/ex", PostOnly(VolExit))      // Exit (vol)
+	http.HandleFunc("/inv/ex", PostOnly(InvExit))      // Exit (inv)
+	http.HandleFunc("/vol/geolist", GetOnly(VGeoList)) // Get geolocation and user info (vol)
+	http.HandleFunc("/inv/geolist", GetOnly(IGeoList)) // Get geolocation and user info (inb)
+	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))  // Get reviews about vol
+	// http.HandleFunc("/vol/chrev", PostOnly(ChangeVRev))      // evaluate vol
 	http.HandleFunc("/vol/ch", PostOnly(VolHelp))            // (Vol) canHelp - set state(1) and geolocation
 	http.HandleFunc("/inv/nh", PostOnly(InvHelp))            // (Inv) needHelp - set state(1) and geolocation
 	http.HandleFunc("/vol/gp", PostOnly(VolGP))              // Set Vol geo
@@ -320,29 +320,29 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
-func ChangeVRev(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-	}
+// func ChangeVRev(w http.ResponseWriter, r *http.Request) {
+// 	body, err := ioutil.ReadAll(r.Body)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	type Req struct {
-		ID     string `json:"id"`
-		Phone  string `json:"phone"`
-		Review string `json:"review"`
-	}
-	var req Req
-	err = json.Unmarshal(body, &req)
-	if err != nil {
-		log.Println(err)
-	}
-	rev := mongo.ChangeVReview(req.ID, req.Phone, req.Review)
-	js, excp := json.Marshal(bson.M{"resp": rev})
-	if excp != nil {
-		log.Println(err)
-	}
-	w.Write(js)
-}
+// 	type Req struct {
+// 		ID     string `json:"id"`
+// 		Phone  string `json:"phone"`
+// 		Review string `json:"review"`
+// 	}
+// 	var req Req
+// 	err = json.Unmarshal(body, &req)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	rev := mongo.ChangeVReview(req.ID, req.Phone, req.Review)
+// 	js, excp := json.Marshal(bson.M{"resp": rev})
+// 	if excp != nil {
+// 		log.Println(err)
+// 	}
+// 	w.Write(js)
+// }
 
 // GP
 func VolGP(w http.ResponseWriter, r *http.Request) {
@@ -461,8 +461,9 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type StopHelp struct {
-		Conid string `json:"conid"`
-		Phone string `json:"phone"`
+		Conid  string `json:"conid"`
+		Phone  string `json:"phone"`
+		Review string `json:"review"`
 	}
 
 	var stop StopHelp
@@ -470,12 +471,20 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	sh := mongo.InvStopHelp(stop.Conid, stop.Phone)
-	js, err := json.Marshal(bson.M{"resp": strconv.FormatBool(sh)})
-	if err != nil {
-		log.Println(err)
+	if len(stop.Review) == 0 {
+		js, err := json.Marshal(bson.M{"resp": "not set review"})
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
+	} else {
+		sh := mongo.InvStopHelp(stop.Conid, stop.Phone, stop.Review)
+		js, err := json.Marshal(bson.M{"resp": strconv.FormatBool(sh)})
+		if err != nil {
+			log.Println(err)
+		}
+		w.Write(js)
 	}
-	w.Write(js)
 }
 
 func HelperInfo(w http.ResponseWriter, r *http.Request) {

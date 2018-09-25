@@ -360,42 +360,42 @@ func GetVolReviews(phone string) (int, int) {
 	return vol.GoodReviews, vol.BadReviews
 }
 
-func ChangeVReview(id, phone, review string) bool {
-	session, err := mgo.Dial(CONN)
-	if err != nil {
-		log.Println(err)
-	}
-	defer session.Close()
-	c := session.DB(VDBNAME).C(VCOL)
-	// i := session.DB(VDBNAME).C(VCOL)
-	var vol s.VolUser
+// func ChangeVReview(id, phone, review string) bool {
+// 	session, err := mgo.Dial(CONN)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	defer session.Close()
+// 	c := session.DB(VDBNAME).C(VCOL)
+// 	// i := session.DB(VDBNAME).C(VCOL)
+// 	var vol s.VolUser
 
-	colQuierier := bson.M{"phone": phone}
-	err = c.Find(colQuierier).One(&vol)
-	if err != nil {
-		log.Println(err)
-	}
-	if len(vol.Phone) == 0 {
-		return false
-	} else {
-		if review == "bad" {
-			rev := bson.M{"$set": bson.M{"badreviews": vol.BadReviews + 1}}
-			err = c.Update(colQuierier, rev)
-			if err != nil {
-				log.Println(err)
-			}
-		} else if review == "good" {
-			rev := bson.M{"$set": bson.M{"goodreviews": vol.GoodReviews + 1}}
-			err = c.Update(colQuierier, rev)
-			if err != nil {
-				log.Println(err)
-			}
-		} else {
-			return false
-		}
-	}
-	return true
-}
+// 	colQuierier := bson.M{"phone": phone}
+// 	err = c.Find(colQuierier).One(&vol)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	if len(vol.Phone) == 0 {
+// 		return false
+// 	} else {
+// 		if review == "bad" {
+// 			rev := bson.M{"$set": bson.M{"badreviews": vol.BadReviews + 1}}
+// 			err = c.Update(colQuierier, rev)
+// 			if err != nil {
+// 				log.Println(err)
+// 			}
+// 		} else if review == "good" {
+// 			rev := bson.M{"$set": bson.M{"goodreviews": vol.GoodReviews + 1}}
+// 			err = c.Update(colQuierier, rev)
+// 			if err != nil {
+// 				log.Println(err)
+// 			}
+// 		} else {
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
 
 func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	session, err := mgo.Dial(CONN)
@@ -457,7 +457,7 @@ func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	}
 }
 
-func InvStopHelp(conid, phone string) bool {
+func InvStopHelp(conid, phone, review string) bool {
 	session, err := mgo.Dial(CONN)
 	if err != nil {
 		log.Println(err)
@@ -465,10 +465,11 @@ func InvStopHelp(conid, phone string) bool {
 	defer session.Close()
 	var vol s.VolUser
 	var inv s.InvUser
+	var vstop bson.M
 
 	v := session.DB(VDBNAME).C(VCOL)
-
 	i := session.DB(IDBNAME).C(ICOL)
+
 	invId, err := strconv.Atoi(conid)
 	if err != nil {
 		log.Println(err)
@@ -492,11 +493,16 @@ func InvStopHelp(conid, phone string) bool {
 		log.Println(vol.State, inv.State)
 		return false
 	} else {
-		stop := bson.M{"$set": bson.M{"state": 0, "introuble": ""}}
 
+		switch review {
+		case "bad":
+			vstop = bson.M{"$set": bson.M{"state": 0, "introuble": "", "badreviews": vol.BadReviews + 1}}
+		case "good":
+			vstop = bson.M{"$set": bson.M{"state": 0, "introuble": "", "goodreviews": vol.GoodReviews + 1}}
+		}
 		istop := bson.M{"$set": bson.M{"state": 0, "conid": 0, "helper": ""}}
 
-		v.Update(bson.M{"phone": phone}, stop)
+		v.Update(bson.M{"phone": phone}, vstop)
 		i.Update(bson.M{"conid": invId}, istop)
 
 		return true
