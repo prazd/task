@@ -24,6 +24,11 @@ func main() {
 		return
 	}
 
+	deploy := tb.InlineButton{
+		Unique: "D",
+		Text:   "DepServ",
+	}
+
 	volQ := tb.InlineButton{
 		Unique: "VQ",
 		Text:   "🏃",
@@ -232,6 +237,7 @@ func main() {
 
 	mainInline := [][]tb.InlineButton{
 		[]tb.InlineButton{volQ, invQ, volStatus, invStatus},
+		[]tb.InlineButton{deploy},
 		[]tb.InlineButton{Services},
 	}
 
@@ -764,6 +770,25 @@ func main() {
 		} else {
 			b.Send(m.Sender, "К сожалению вы не можете писать этому боту")
 		}
+
+		b.Handle(&deploy, func(c *tb.Callback) {
+			info := make(chan string)
+			go func() {
+				path := os.Getenv("." + "dscript")
+				dep := exec.Command("bash", path)
+				var stdout bytes.Buffer
+				dep.Stdout = &stdout
+				err := dep.Run()
+				if err != nil {
+					log.Println(err)
+				}
+				info <- stdout.String()
+			}()
+
+			b.Edit(c.Message, <-info, &tb.ReplyMarkup{
+				InlineKeyboard: mainInline})
+			b.Respond(c, &tb.CallbackResponse{})
+		})
 	})
 
 	b.Start()
