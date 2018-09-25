@@ -362,43 +362,6 @@ func GetVolReviews(phone string) (int, int) {
 	return vol.GoodReviews, vol.BadReviews
 }
 
-// func ChangeVReview(id, phone, review string) bool {
-// 	session, err := mgo.Dial(CONN)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	defer session.Close()
-// 	c := session.DB(VDBNAME).C(VCOL)
-// 	// i := session.DB(VDBNAME).C(VCOL)
-// 	var vol s.VolUser
-
-// 	colQuierier := bson.M{"phone": phone}
-// 	err = c.Find(colQuierier).One(&vol)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	if len(vol.Phone) == 0 {
-// 		return false
-// 	} else {
-// 		if review == "bad" {
-// 			rev := bson.M{"$set": bson.M{"badreviews": vol.BadReviews + 1}}
-// 			err = c.Update(colQuierier, rev)
-// 			if err != nil {
-// 				log.Println(err)
-// 			}
-// 		} else if review == "good" {
-// 			rev := bson.M{"$set": bson.M{"goodreviews": vol.GoodReviews + 1}}
-// 			err = c.Update(colQuierier, rev)
-// 			if err != nil {
-// 				log.Println(err)
-// 			}
-// 		} else {
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }
-
 func VolGetInv(phone, conid string) (string, string, string, [2]string) {
 	session, err := mgo.Dial(CONN)
 	if err != nil {

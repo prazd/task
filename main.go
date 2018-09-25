@@ -14,16 +14,15 @@ import (
 
 func main() {
 
-	http.HandleFunc("/inv/up", PostOnly(InvSignUp))    // Sign up (inv)
-	http.HandleFunc("/inv/in", PostOnly(InvSignIn))    // Sign in (inv), get inv info
-	http.HandleFunc("/vol/up", PostOnly(VolSignUp))    // Sign up (vol)
-	http.HandleFunc("/vol/in", PostOnly(VolSignIn))    // Sign in (vol), get vol info
-	http.HandleFunc("/vol/ex", PostOnly(VolExit))      // Exit (vol)
-	http.HandleFunc("/inv/ex", PostOnly(InvExit))      // Exit (inv)
-	http.HandleFunc("/vol/geolist", GetOnly(VGeoList)) // Get geolocation and user info (vol)
-	http.HandleFunc("/inv/geolist", GetOnly(IGeoList)) // Get geolocation and user info (inb)
-	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))  // Get reviews about vol
-	// http.HandleFunc("/vol/chrev", PostOnly(ChangeVRev))      // evaluate vol
+	http.HandleFunc("/inv/up", PostOnly(InvSignUp))          // Sign up (inv)
+	http.HandleFunc("/inv/in", PostOnly(InvSignIn))          // Sign in (inv), get inv info
+	http.HandleFunc("/vol/up", PostOnly(VolSignUp))          // Sign up (vol)
+	http.HandleFunc("/vol/in", PostOnly(VolSignIn))          // Sign in (vol), get vol info
+	http.HandleFunc("/vol/ex", PostOnly(VolExit))            // Exit (vol)
+	http.HandleFunc("/inv/ex", PostOnly(InvExit))            // Exit (inv)
+	http.HandleFunc("/vol/geolist", GetOnly(VGeoList))       // Get geolocation and user info (vol)
+	http.HandleFunc("/inv/geolist", GetOnly(IGeoList))       // Get geolocation and user info (inb)
+	http.HandleFunc("/vol/getrev", PostOnly(GetVRev))        // Get reviews about vol
 	http.HandleFunc("/vol/ch", PostOnly(VolHelp))            // (Vol) canHelp - set state(1) and geolocation
 	http.HandleFunc("/inv/nh", PostOnly(InvHelp))            // (Inv) needHelp - set state(1) and geolocation
 	http.HandleFunc("/vol/gp", PostOnly(VolGP))              // Set Vol geo
@@ -319,30 +318,6 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(js)
 }
-
-// func ChangeVRev(w http.ResponseWriter, r *http.Request) {
-// 	body, err := ioutil.ReadAll(r.Body)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-
-// 	type Req struct {
-// 		ID     string `json:"id"`
-// 		Phone  string `json:"phone"`
-// 		Review string `json:"review"`
-// 	}
-// 	var req Req
-// 	err = json.Unmarshal(body, &req)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	rev := mongo.ChangeVReview(req.ID, req.Phone, req.Review)
-// 	js, excp := json.Marshal(bson.M{"resp": rev})
-// 	if excp != nil {
-// 		log.Println(err)
-// 	}
-// 	w.Write(js)
-// }
 
 // GP
 func VolGP(w http.ResponseWriter, r *http.Request) {
