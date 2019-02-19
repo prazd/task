@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"gopkg.in/mgo.v2/bson"
 	s "github.com/prazd/task/sett"
-	"github.com/prazd/task/mongo"
+	"github.com/prazd/task/server/mongo"
 	"log"
 	"fmt"
 )

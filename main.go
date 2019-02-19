@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"./mongo"
+	"./server/mongo"
 	s "./sett"
 	"gopkg.in/mgo.v2/bson"
 )
