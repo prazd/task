@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	s "../sett"
+	s "github.com/prazd/task/sett"
 
 	"golang.org/x/crypto/bcrypt"
 	mgo "gopkg.in/mgo.v2"

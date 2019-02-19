@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"./mongo"
+	"github.com/prazd/task/bot/mongo"
 	portscanner "github.com/anvie/port-scanner"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
