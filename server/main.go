@@ -1,10 +1,10 @@
 package main
 
 import (
+	. "github.com/prazd/task/server/handlers"
+	. "github.com/prazd/task/server/lib"
 	"log"
 	"net/http"
-	. "github.com/prazd/task/server/lib"
-	. "github.com/prazd/task/server/handlers"
 )
 
 func main() {
@@ -29,5 +29,3 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
-
-

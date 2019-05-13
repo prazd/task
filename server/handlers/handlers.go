@@ -2,29 +2,28 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
-	"io/ioutil"
-	"strconv"
-	"gopkg.in/mgo.v2/bson"
-	s "github.com/prazd/task/sett"
-	"github.com/prazd/task/server/mongo"
-	"log"
 	"fmt"
+	"github.com/prazd/task/server/mongo"
+	s "github.com/prazd/task/sett"
+	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strconv"
 )
-
 
 func InvSignUp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	var inv s.InvUser
 	err = json.Unmarshal(body, &inv)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -37,7 +36,7 @@ func InvSignUp(w http.ResponseWriter, r *http.Request) {
 	js, err := json.Marshal(resp)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -47,14 +46,14 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	var inv s.InvUser
 	err = json.Unmarshal(body, &inv)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	sIn, name, phone := mongo.InvSin(inv.Id, inv.Password)
@@ -77,7 +76,7 @@ func InvSignIn(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(respFull)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 		}
 		w.Write(js)
 	}
@@ -88,7 +87,7 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -96,7 +95,7 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -109,7 +108,7 @@ func VolSignUp(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -120,14 +119,14 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	var vol s.VolUser
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	sIn, name, phone := mongo.VolSin(vol.Phone, vol.Password)
@@ -145,7 +144,7 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(respExcp)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -153,7 +152,7 @@ func VolSignIn(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(respFull)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -166,7 +165,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -181,7 +180,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &ch)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -193,7 +192,7 @@ func VolHelp(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -203,7 +202,7 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -218,7 +217,7 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &nh)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -230,7 +229,7 @@ func InvHelp(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -240,7 +239,7 @@ func VolExit(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -248,7 +247,7 @@ func VolExit(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -260,7 +259,7 @@ func VolExit(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -270,7 +269,7 @@ func InvExit(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -278,7 +277,7 @@ func InvExit(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &inv)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -290,7 +289,7 @@ func InvExit(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -304,7 +303,7 @@ func VGeoList(w http.ResponseWriter, r *http.Request) {
 	js, err := json.Marshal(resp)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -318,7 +317,7 @@ func IGeoList(w http.ResponseWriter, r *http.Request) {
 	js, err := json.Marshal(resp)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -329,14 +328,14 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	var vol s.VolUser
 	err = json.Unmarshal(body, &vol)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -350,7 +349,7 @@ func GetVRev(w http.ResponseWriter, r *http.Request) {
 	js, excp := json.Marshal(resp)
 	if excp != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -361,7 +360,7 @@ func VolGP(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -376,7 +375,7 @@ func VolGP(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &ch)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -388,7 +387,7 @@ func VolGP(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -398,7 +397,7 @@ func InvGP(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -413,7 +412,7 @@ func InvGP(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &ch)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -425,7 +424,7 @@ func InvGP(w http.ResponseWriter, r *http.Request) {
 	js, bad := json.Marshal(resp)
 	if bad != nil {
 		log.Println(bad)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -437,7 +436,7 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	// var InvID string
@@ -450,7 +449,7 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &getH)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	info, name, phone, geo := mongo.VolGetInv(getH.Phone, getH.Conid)
@@ -470,7 +469,7 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 		js, bad := json.Marshal(respEx)
 		if bad != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -478,7 +477,7 @@ func VolHelpInv(w http.ResponseWriter, r *http.Request) {
 		js, bad := json.Marshal(resp)
 		if bad != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -490,7 +489,7 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 
@@ -504,14 +503,14 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &stop)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	if len(stop.Review) == 0 {
 		js, err := json.Marshal(bson.M{"resp": "not set review"})
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -520,7 +519,7 @@ func IStop(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(bson.M{"resp": strconv.FormatBool(sh)})
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -531,7 +530,7 @@ func HelperInfo(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	type InvInfo struct {
@@ -541,7 +540,7 @@ func HelperInfo(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &i)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	info, helper := mongo.Helper(i.Id)
@@ -549,7 +548,7 @@ func HelperInfo(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(bson.M{"resp": "bad"})
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -557,7 +556,7 @@ func HelperInfo(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(bson.M{"resp": "true", "name": helper.Name, "phone": helper.Phone, "longitude": helper.Geo[1], "latitude": helper.Geo[0]})
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -568,7 +567,7 @@ func VolRen(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	type VolPhone struct {
@@ -578,14 +577,14 @@ func VolRen(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &v)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	stop := mongo.VolStop(v.Phone)
 	js, err := json.Marshal(bson.M{"resp": strconv.FormatBool(stop)})
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	w.Write(js)
@@ -595,7 +594,7 @@ func HelperGeo(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	type InvId struct {
@@ -605,7 +604,7 @@ func HelperGeo(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &iId)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprint(w,"Error 500")
+		fmt.Fprint(w, "Error 500")
 		return
 	}
 	info, geo := mongo.HGeo(iId.Id)
@@ -613,7 +612,7 @@ func HelperGeo(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(bson.M{"resp": "bad"})
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
@@ -621,10 +620,9 @@ func HelperGeo(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(bson.M{"resp": "nice", "longitude": geo[1], "latitude": geo[0]})
 		if err != nil {
 			log.Println(err)
-			fmt.Fprint(w,"Error 500")
+			fmt.Fprint(w, "Error 500")
 			return
 		}
 		w.Write(js)
 	}
 }
-
