@@ -1,18 +1,19 @@
-FROM golang:latest
+FROM golang:latest as builder
 RUN mkdir /goapp
 ADD . /goapp
-ENV CONN="mongodb://mongo:27017"
+ENV CONN="mongodb://localhost:27017"
 WORKDIR /goapp
 
-RUN go get golang.org/x/crypto/bcrypt
-RUN go get gopkg.in/mgo.v2
-RUN go get gopkg.in/mgo.v2/bson
-RUN go get github.com/prazd/task/server/handlers
+ARG service
 
-RUN go build -o main ./server
-RUN echo "export Check=100023 >> .bashrc" 
+RUN go build -o /bin/main ./$service
+
+
+FROM debian:latest
+
+COPY --from=builder /bin /app/
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ 
 
 EXPOSE 3000
-CMD ['/goapp/main']
 
-
+CMD ["/app/main"]
